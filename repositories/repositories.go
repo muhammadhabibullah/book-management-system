@@ -9,7 +9,7 @@ type Repository struct {
 	BookRepository mysql.BookRepository
 }
 
-// Init return Repository
+// Init returns Repository
 func Init() *Repository {
 	mysqlDB := mysql.Init()
 	return &Repository{

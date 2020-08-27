@@ -10,7 +10,7 @@ type UseCase struct {
 	Service *services.Services
 }
 
-// Init return UseCase
+// Init returns UseCase
 func Init(repo *repositories.Repository) *UseCase {
 	return &UseCase{
 		Service: services.Init(repo),

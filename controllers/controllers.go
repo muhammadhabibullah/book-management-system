@@ -5,7 +5,7 @@ import (
 	"book-management-system/usecases"
 )
 
-// Init set controllers
+// Init sets controllers
 func Init(useCase *usecases.UseCase) {
 	REST.Init(useCase)
 }
