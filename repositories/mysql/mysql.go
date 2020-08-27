@@ -20,7 +20,6 @@ var (
 func Init() *gorm.DB {
 	once.Do(func() {
 		dsn := getMySQLConnString()
-		fmt.Println(dsn)
 
 		var err error
 		mysqlDB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
@@ -37,6 +36,6 @@ func getMySQLConnString() string {
 	config := configs.GetConfig()
 	c := config.Mysql
 
-	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s",
+	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		c.User, c.Pass, c.Host, c.Port, c.Name)
 }

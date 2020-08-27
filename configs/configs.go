@@ -1,7 +1,6 @@
 package configs
 
 import (
-	"fmt"
 	"log"
 	"sync"
 
@@ -48,8 +47,6 @@ func GetConfig() *Configs {
 		if err := conf.Unmarshal(&configs); err != nil {
 			log.Fatalf("failed to unmarshal config: %s", err)
 		}
-
-		fmt.Println(configs)
 	})
 
 	return &configs
