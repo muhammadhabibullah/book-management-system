@@ -1,0 +1,20 @@
+version: '3.3'
+
+services:
+  book_management_system_mysql_db:
+    image: mysql:5.7.26
+    restart: always
+    environment:
+      MYSQL_DATABASE: 'book_management_db'
+      MYSQL_USER: 'user'
+      MYSQL_PASSWORD: 'password'
+      MYSQL_ROOT_PASSWORD: 'password'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - docker-db:/var/lib/mysql
+
+volumes:
+  docker-db:
