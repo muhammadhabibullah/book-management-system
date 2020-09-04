@@ -10,3 +10,5 @@ import (
 func Init(useCase *usecases.UseCase) {
 	REST.Init(useCase)
 }
+
+func testUnusedFunc() {}
