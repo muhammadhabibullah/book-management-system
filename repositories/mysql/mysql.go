@@ -1,3 +1,4 @@
+// Package mysql contains all MySQL repositories
 package mysql
 
 import (
@@ -9,6 +10,7 @@ import (
 	"gorm.io/gorm"
 
 	"book-management-system/configs"
+	"book-management-system/entities/models"
 )
 
 var (
@@ -25,6 +27,13 @@ func Init() *gorm.DB {
 		mysqlDB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
 		if err != nil {
 			log.Fatalf("failed to connect to mysql database: %s", err)
+		}
+
+		if err = mysqlDB.Set("gorm:table_options", "ENGINE=InnoDB").
+			AutoMigrate(
+				&models.Book{},
+			); err != nil {
+			log.Fatalf("failed to migrate new model to mysql database: %s", err)
 		}
 	})
 

@@ -9,6 +9,7 @@ import (
 // BookService handle business logic related to book
 type BookService interface {
 	GetBooks() (models.Books, error)
+	CreateBook(*models.Book) error
 }
 
 type bookService struct {
@@ -24,4 +25,8 @@ func NewBookService(repo *repositories.Repository) BookService {
 
 func (svc *bookService) GetBooks() (models.Books, error) {
 	return svc.BookRepository.GetAll()
+}
+
+func (svc *bookService) CreateBook(book *models.Book) error {
+	return svc.BookRepository.CreateBook(book)
 }

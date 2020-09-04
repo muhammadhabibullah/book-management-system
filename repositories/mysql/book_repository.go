@@ -9,6 +9,7 @@ import (
 // BookRepository handle sql query to book table
 type BookRepository interface {
 	GetAll() (models.Books, error)
+	CreateBook(*models.Book) error
 }
 
 type bookRepository struct {
@@ -27,4 +28,9 @@ func (repo *bookRepository) GetAll() (models.Books, error) {
 
 	query := repo.db.Find(&books)
 	return books, query.Error
+}
+
+func (repo *bookRepository) CreateBook(book *models.Book) error {
+	query := repo.db.Create(book)
+	return query.Error
 }

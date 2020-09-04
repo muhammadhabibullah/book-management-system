@@ -1,3 +1,4 @@
+// Package configs contains app configuration
 package configs
 
 import (

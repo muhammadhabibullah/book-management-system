@@ -1,3 +1,4 @@
+// Package controllers contains all controllers
 package controllers
 
 import (

@@ -1,10 +1,15 @@
 package models
 
+import (
+	"gorm.io/gorm"
+)
+
 // Book model
 type Book struct {
-	Name string
-	ISBN string
+	gorm.Model
+	Name string `gorm:"name" json:"name"`
+	ISBN string `gorm:"isbn" json:"isbn"`
 }
 
-// Books model
+// Books model is an array of Book
 type Books []Book

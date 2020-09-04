@@ -1,3 +1,4 @@
+// Package usecases contains services and pipelines.
 package usecases
 
 import (
@@ -5,7 +6,7 @@ import (
 	"book-management-system/usecases/services"
 )
 
-// UseCase contains use-cases
+// UseCase contains usecases
 type UseCase struct {
 	Service *services.Services
 }
