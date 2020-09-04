@@ -1,13 +1,16 @@
 {
-  "debug": true,
-  "server": {
-    "address": ":3000"
+  "Debug": true,
+  "Server": {
+    "Address": ":3000"
   },
-  "mysql": {
-    "host": "localhost",
-    "port": "3306",
-    "user": "user",
-    "pass": "password",
-    "name": "book_management_db"
+  "Mysql": {
+    "Host": "localhost",
+    "Port": "3306",
+    "User": "user",
+    "Pass": "password",
+    "Name": "book_management_db",
+    "MaxIdleConn": 10,
+    "MaxOpenConn": 10,
+    "MinuteConnMaxLifetime": 5
   }
 }

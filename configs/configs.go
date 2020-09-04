@@ -27,11 +27,14 @@ type ServerConfig struct {
 
 // MySQLConfig consists MySQL database configuration
 type MySQLConfig struct {
-	Host string
-	Port string
-	User string
-	Pass string
-	Name string
+	Host                  string
+	Port                  string
+	User                  string
+	Pass                  string
+	Name                  string
+	MaxIdleConn           int
+	MaxOpenConn           int
+	MinuteConnMaxLifetime int
 }
 
 // GetConfig return Configs object read from config.json file

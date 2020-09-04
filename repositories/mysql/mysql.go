@@ -37,10 +37,7 @@ func Init() *gorm.DB {
 			log.Fatalf("failed to migrate new model to mysql database: %s", err)
 		}
 
-		db, _ := mysqlDB.DB()
-		db.SetMaxIdleConns(10)
-		db.SetMaxOpenConns(100)
-		db.SetConnMaxLifetime(5 * time.Minute)
+		configMySQLConn()
 	})
 
 	return mysqlDB
@@ -48,9 +45,18 @@ func Init() *gorm.DB {
 
 // getMySQLConnString return connection string from config
 func getMySQLConnString() string {
-	config := configs.GetConfig()
-	c := config.Mysql
+	c := configs.GetConfig().Mysql
 
 	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		c.User, c.Pass, c.Host, c.Port, c.Name)
+}
+
+// configMySQLConn configure MySQLConnection settings
+func configMySQLConn() {
+	c := configs.GetConfig().Mysql
+
+	db, _ := mysqlDB.DB()
+	db.SetMaxIdleConns(c.MaxIdleConn)
+	db.SetMaxOpenConns(c.MaxOpenConn)
+	db.SetConnMaxLifetime(time.Duration(c.MinuteConnMaxLifetime) * time.Minute)
 }
