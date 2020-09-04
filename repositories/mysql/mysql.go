@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"sync"
+	"time"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -35,6 +36,11 @@ func Init() *gorm.DB {
 			); err != nil {
 			log.Fatalf("failed to migrate new model to mysql database: %s", err)
 		}
+
+		db, _ := mysqlDB.DB()
+		db.SetMaxIdleConns(10)
+		db.SetMaxOpenConns(100)
+		db.SetConnMaxLifetime(5 * time.Minute)
 	})
 
 	return mysqlDB
