@@ -11,7 +11,10 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
+	httpSwagger "github.com/swaggo/http-swagger"
 
+	"book-management-system/docs"
+	"book-management-system/entities/constants"
 	"book-management-system/usecases"
 )
 
@@ -21,7 +24,14 @@ func Init(useCase *usecases.UseCase) {
 
 	NewBookController(r, useCase)
 
+	initDoc(r)
 	serve(r)
+}
+
+func initDoc(r *mux.Router) {
+	docs.SwaggerInfo.Title = constants.ServiceName
+	docs.SwaggerInfo.Version = constants.ServiceVersion
+	r.PathPrefix("/swagger/").Handler(httpSwagger.WrapHandler)
 }
 
 func serve(r http.Handler) {

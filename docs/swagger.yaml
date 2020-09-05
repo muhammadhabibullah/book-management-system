@@ -1,0 +1,71 @@
+definitions:
+  models.Book:
+    properties:
+      isbn:
+        example: "9780062315007"
+        type: string
+      name:
+        example: The Alchemist
+        type: string
+    type: object
+  models.Books:
+    items:
+      $ref: '#/definitions/models.Book'
+    type: array
+  responses.ErrorResponse:
+    additionalProperties:
+      type: string
+    type: object
+info:
+  contact: {}
+  license: {}
+paths:
+  /v1/book:
+    get:
+      consumes:
+      - application/json
+      description: Get all books
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Books'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Get all books
+      tags:
+      - Book
+    post:
+      consumes:
+      - application/json
+      description: Create a new book
+      parameters:
+      - description: Request Body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Book'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Book'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Create a new book
+      tags:
+      - Book
+swagger: "2.0"

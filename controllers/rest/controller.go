@@ -3,10 +3,12 @@ package rest
 import (
 	"encoding/json"
 	"net/http"
+
+	"book-management-system/controllers/rest/responses"
 )
 
 func respondWithError(w http.ResponseWriter, code int, message string) {
-	respondWithJSON(w, code, map[string]string{"error": message})
+	respondWithJSON(w, code, responses.ErrorResponse{"error": message})
 }
 
 func respondWithJSON(w http.ResponseWriter, code int, payload interface{}) {
