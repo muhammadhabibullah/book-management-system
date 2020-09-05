@@ -37,3 +37,7 @@ jobs:
         run: |
           go test -race -v -coverprofile=coverage.out -covermode=atomic ./...
           bash <(curl -s https://codecov.io/bash) -t ${{ secrets.CODECOV_TOKEN }}
+
+
+      - name: Notify Go Report Card
+        run: curl -XPOST https://goreportcard.com/checks -F 'repo=github.com/muhammadhabibullah/book-management-system'
