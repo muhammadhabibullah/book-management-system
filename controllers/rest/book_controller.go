@@ -51,9 +51,6 @@ func (ctrl *BookController) CreateBook(res http.ResponseWriter, req *http.Reques
 		respondWithError(res, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
-	defer func() {
-		_ = req.Body.Close()
-	}()
 
 	if err := ctrl.bookService.CreateBook(&book); err != nil {
 		respondWithError(res, http.StatusInternalServerError,
@@ -102,9 +99,6 @@ func (ctrl *BookController) UpdateBook(res http.ResponseWriter, req *http.Reques
 		respondWithError(res, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
-	defer func() {
-		_ = req.Body.Close()
-	}()
 
 	if err := ctrl.bookService.UpdateBook(&book); err != nil {
 		respondWithError(res, http.StatusInternalServerError,

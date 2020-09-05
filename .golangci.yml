@@ -28,6 +28,7 @@ linters-settings:
 linters:
   disable-all: true
   enable:
+    - bodyclose
     - deadcode
     - dupl
     - errcheck
