@@ -1,2 +1,0 @@
-name: Go report card
-  uses: creekorful/goreportcard-action@v1.0
