@@ -35,7 +35,7 @@ func NewBookController(route *mux.Router, useCase *usecases.UseCase) {
 // @Tags 		Book
 // @Accept 		json
 // @Produce 	json
-// @Param 		request 	body 		models.Book 	true 	"Request Body"
+// @Param 		request 	body 		models.Book 	true 		"Request Body"
 // @Success 	201 		{object}	models.Book 				"Created"
 // @Failure 	400 		{object} 	responses.ErrorResponse 	"Bad Request"
 // @Failure 	500 		{object}	responses.ErrorResponse 	"Internal Server Error"
@@ -73,7 +73,7 @@ func (ctrl *BookController) GetBooks(res http.ResponseWriter, _ *http.Request) {
 	books, err := ctrl.bookService.GetBooks()
 	if err != nil {
 		respondWithError(res, http.StatusInternalServerError,
-			fmt.Sprintf("Failed create book: %s", err.Error()))
+			fmt.Sprintf("Failed get books: %s", err.Error()))
 		return
 	}
 
