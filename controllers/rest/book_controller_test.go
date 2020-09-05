@@ -7,16 +7,40 @@ import (
 	"fmt"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 
 	"github.com/golang/mock/gomock"
+	"github.com/gorilla/mux"
 
 	"book-management-system/controllers/rest/responses"
 	"book-management-system/entities/models"
 	mocks "book-management-system/mocks/services"
+	"book-management-system/repositories"
+	"book-management-system/usecases"
+	"book-management-system/usecases/services"
 )
 
-func TestNewBookController(t *testing.T) {}
+func TestNewBookController(t *testing.T) {
+	repo := &repositories.Repository{}
+	bookService := services.NewBookService(repo)
+	usecase := &usecases.UseCase{
+		Service: &services.Services{
+			BookService: bookService,
+		},
+	}
+
+	route := mux.NewRouter()
+	got := NewBookController(route, usecase)
+	expected := &BookController{
+		bookService: bookService,
+	}
+
+	if !reflect.DeepEqual(got, expected) {
+		t.Errorf("NewBookController returns %+v\n expected %+v",
+			got, expected)
+	}
+}
 
 func TestBookController_CreateBook(t *testing.T) {
 	type input struct {

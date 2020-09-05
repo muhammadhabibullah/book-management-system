@@ -18,7 +18,7 @@ type BookController struct {
 }
 
 // NewBookController returns new BookController
-func NewBookController(route *mux.Router, useCase *usecases.UseCase) {
+func NewBookController(route *mux.Router, useCase *usecases.UseCase) *BookController {
 	ctrl := &BookController{
 		bookService: useCase.Service.BookService,
 	}
@@ -27,6 +27,8 @@ func NewBookController(route *mux.Router, useCase *usecases.UseCase) {
 	v1BookRoute := v1Route.PathPrefix("/book").Subrouter()
 	v1BookRoute.HandleFunc("", ctrl.CreateBook).Methods("POST")
 	v1BookRoute.HandleFunc("", ctrl.GetBooks).Methods("GET")
+
+	return ctrl
 }
 
 // CreateBook handle create book request
