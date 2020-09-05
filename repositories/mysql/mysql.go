@@ -45,18 +45,18 @@ func Init() *gorm.DB {
 
 // getMySQLConnString return connection string from config
 func getMySQLConnString() string {
-	c := configs.GetConfig().Mysql
+	cfg := configs.GetConfig().Mysql
 
 	return fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
-		c.User, c.Pass, c.Host, c.Port, c.Name)
+		cfg.User, cfg.Pass, cfg.Host, cfg.Port, cfg.Name)
 }
 
 // configMySQLConn configure MySQLConnection settings
 func configMySQLConn() {
-	c := configs.GetConfig().Mysql
+	cfg := configs.GetConfig().Mysql
 
 	db, _ := mysqlDB.DB()
-	db.SetMaxIdleConns(c.MaxIdleConn)
-	db.SetMaxOpenConns(c.MaxOpenConn)
-	db.SetConnMaxLifetime(time.Duration(c.MinuteConnMaxLifetime) * time.Minute)
+	db.SetMaxIdleConns(cfg.MaxIdleConn)
+	db.SetMaxOpenConns(cfg.MaxOpenConn)
+	db.SetConnMaxLifetime(time.Duration(cfg.ConnMaxLifetime) * time.Minute)
 }

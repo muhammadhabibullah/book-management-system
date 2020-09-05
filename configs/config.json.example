@@ -2,6 +2,9 @@
   "Debug": true,
   "Server": {
     "Address": ":3000"
+    "WriteTimeout": 15,
+    "ReadTimeout": 15,
+    "IdleTimeout": 60
   },
   "Mysql": {
     "Host": "localhost",
@@ -11,6 +14,6 @@
     "Name": "book_management_db",
     "MaxIdleConn": 10,
     "MaxOpenConn": 10,
-    "MinuteConnMaxLifetime": 5
+    "ConnMaxLifetime": 5
   }
 }

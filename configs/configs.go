@@ -22,19 +22,22 @@ type Configs struct {
 
 // ServerConfig consists server configuration
 type ServerConfig struct {
-	Address string
+	Address      string
+	WriteTimeout int
+	ReadTimeout  int
+	IdleTimeout  int
 }
 
 // MySQLConfig consists MySQL database configuration
 type MySQLConfig struct {
-	Host                  string
-	Port                  string
-	User                  string
-	Pass                  string
-	Name                  string
-	MaxIdleConn           int
-	MaxOpenConn           int
-	MinuteConnMaxLifetime int
+	Host            string
+	Port            string
+	User            string
+	Pass            string
+	Name            string
+	MaxIdleConn     int
+	MaxOpenConn     int
+	ConnMaxLifetime int
 }
 
 // GetConfig return Configs object read from config.json file

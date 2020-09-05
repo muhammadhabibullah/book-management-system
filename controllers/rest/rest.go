@@ -13,6 +13,7 @@ import (
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
 
+	"book-management-system/configs"
 	"book-management-system/docs"
 	"book-management-system/entities/constants"
 	"book-management-system/usecases"
@@ -44,11 +45,12 @@ func serve(r http.Handler) {
 	)
 	flag.Parse()
 
+	cfg := configs.GetConfig().Server
 	srv := &http.Server{
-		Addr:         "0.0.0.0:8080",
-		WriteTimeout: time.Second * 15,
-		ReadTimeout:  time.Second * 15,
-		IdleTimeout:  time.Second * 60,
+		Addr:         cfg.Address,
+		WriteTimeout: time.Duration(cfg.WriteTimeout) * time.Second,
+		ReadTimeout:  time.Duration(cfg.ReadTimeout) * time.Second,
+		IdleTimeout:  time.Duration(cfg.IdleTimeout) * time.Second,
 		Handler:      r,
 	}
 
