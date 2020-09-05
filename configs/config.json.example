@@ -1,5 +1,5 @@
 {
-  "Debug": true,
+  "Production": false,
   "Server": {
     "Address": ":3000"
     "WriteTimeout": 15,

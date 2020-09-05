@@ -31,7 +31,7 @@ func Init() *gorm.DB {
 			log.Fatalf("failed to connect to mysql database: %s", err)
 		}
 
-		if cfg.Debug {
+		if !cfg.Production {
 			if err = mysqlDB.Set("gorm:table_options", "ENGINE=InnoDB").
 				AutoMigrate(
 					&models.Book{},

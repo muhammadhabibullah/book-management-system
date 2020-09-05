@@ -15,9 +15,9 @@ var (
 
 // Configs consists all configuration
 type Configs struct {
-	Debug  bool
-	Server ServerConfig
-	Mysql  MySQLConfig
+	Production bool
+	Server     ServerConfig
+	Mysql      MySQLConfig
 }
 
 // ServerConfig consists server configuration
