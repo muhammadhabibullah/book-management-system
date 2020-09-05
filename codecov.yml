@@ -1,0 +1,3 @@
+ignore:
+  - "controllers/rest/rest.go"
+  - "repositories/mysql/mysql.go"
