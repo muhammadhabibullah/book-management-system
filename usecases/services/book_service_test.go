@@ -16,12 +16,12 @@ import (
 func TestNewBookService(t *testing.T) {
 	bookRepo := mysql.NewBookRepository(nil)
 	repo := &repositories.Repository{
-		BookRepository: bookRepo,
+		MySQLBookRepository: bookRepo,
 	}
 
 	got := NewBookService(repo)
 	expected := &bookService{
-		BookRepository: bookRepo,
+		MySQLBookRepository: bookRepo,
 	}
 
 	if !reflect.DeepEqual(got, expected) {
@@ -99,7 +99,7 @@ func TestBookService_CreateBook(t *testing.T) {
 
 			bookService := NewBookService(
 				&repositories.Repository{
-					BookRepository: bookRepoMock,
+					MySQLBookRepository: bookRepoMock,
 				},
 			)
 
@@ -184,7 +184,7 @@ func TestBookService_GetBook(t *testing.T) {
 
 			bookService := NewBookService(
 				&repositories.Repository{
-					BookRepository: bookRepoMock,
+					MySQLBookRepository: bookRepoMock,
 				},
 			)
 
@@ -270,7 +270,7 @@ func TestBookService_UpdateBook(t *testing.T) {
 
 			bookService := NewBookService(
 				&repositories.Repository{
-					BookRepository: bookRepoMock,
+					MySQLBookRepository: bookRepoMock,
 				},
 			)
 

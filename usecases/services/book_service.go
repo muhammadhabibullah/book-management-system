@@ -3,6 +3,7 @@ package services
 import (
 	"book-management-system/entities/models"
 	"book-management-system/repositories"
+	"book-management-system/repositories/elasticsearch"
 	"book-management-system/repositories/mysql"
 )
 
@@ -14,24 +15,26 @@ type BookService interface {
 }
 
 type bookService struct {
-	BookRepository mysql.BookRepository
+	MySQLBookRepository mysql.BookRepository
+	ESBookRepository    elasticsearch.BookRepository
 }
 
 // NewBookService returns BookService
 func NewBookService(repo *repositories.Repository) BookService {
 	return &bookService{
-		BookRepository: repo.BookRepository,
+		MySQLBookRepository: repo.MySQLBookRepository,
+		ESBookRepository:    repo.ESBookRepository,
 	}
 }
 
 func (svc *bookService) GetBooks() (models.Books, error) {
-	return svc.BookRepository.GetAll()
+	return svc.MySQLBookRepository.GetAll()
 }
 
 func (svc *bookService) CreateBook(book *models.Book) error {
-	return svc.BookRepository.CreateBook(book)
+	return svc.MySQLBookRepository.CreateBook(book)
 }
 
 func (svc *bookService) UpdateBook(book *models.Book) error {
-	return svc.BookRepository.UpdateBook(book)
+	return svc.MySQLBookRepository.UpdateBook(book)
 }

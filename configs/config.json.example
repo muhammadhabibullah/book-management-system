@@ -15,5 +15,11 @@
     "MaxIdleConn": 10,
     "MaxOpenConn": 10,
     "ConnMaxLifetime": 5
+  },
+  "ElasticSearch": {
+    "Address": "http://localhost:9200",
+    "IsAuth": false,
+    "Username": "",
+    "Password": ""
   }
 }
