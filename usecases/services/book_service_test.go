@@ -8,20 +8,25 @@ import (
 	"github.com/golang/mock/gomock"
 
 	"book-management-system/entities/models"
-	mocks "book-management-system/mocks/repositories"
+	esMocks "book-management-system/mocks/repositories/elasticsearch"
+	mySqlMocks "book-management-system/mocks/repositories/mysql"
 	"book-management-system/repositories"
+	"book-management-system/repositories/elasticsearch"
 	"book-management-system/repositories/mysql"
 )
 
 func TestNewBookService(t *testing.T) {
-	bookRepo := mysql.NewBookRepository(nil)
+	mySQLBookRepo := mysql.NewBookRepository(nil)
+	esBookRepo := elasticsearch.NewBookRepository(nil)
 	repo := &repositories.Repository{
-		MySQLBookRepository: bookRepo,
+		MySQLBookRepository: mySQLBookRepo,
+		ESBookRepository:    esBookRepo,
 	}
 
 	got := NewBookService(repo)
 	expected := &bookService{
-		MySQLBookRepository: bookRepo,
+		MySQLBookRepository: mySQLBookRepo,
+		ESBookRepository:    esBookRepo,
 	}
 
 	if !reflect.DeepEqual(got, expected) {
@@ -43,9 +48,10 @@ func TestBookService_CreateBook(t *testing.T) {
 		err error
 	}
 	type confMock struct {
-		input        input
-		output       output
-		bookRepoMock *mocks.MockBookRepository
+		input             input
+		output            output
+		mySQLBookRepoMock *mySqlMocks.MockBookRepository
+		esBookRepoMock    *esMocks.MockBookRepository
 	}
 
 	tests := []struct {
@@ -66,9 +72,13 @@ func TestBookService_CreateBook(t *testing.T) {
 				err: nil,
 			},
 			configureMock: func(conf confMock) {
-				conf.bookRepoMock.EXPECT().
+				conf.mySQLBookRepoMock.EXPECT().
 					CreateBook(conf.input.book).
 					Return(conf.output.err)
+
+				conf.esBookRepoMock.EXPECT().
+					CreateBook(conf.input.book).
+					Return(nil)
 			},
 		},
 		{
@@ -83,7 +93,7 @@ func TestBookService_CreateBook(t *testing.T) {
 				err: errDatabase,
 			},
 			configureMock: func(conf confMock) {
-				conf.bookRepoMock.EXPECT().
+				conf.mySQLBookRepoMock.EXPECT().
 					CreateBook(conf.input.book).
 					Return(conf.output.err)
 			},
@@ -95,18 +105,21 @@ func TestBookService_CreateBook(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bookRepoMock := mocks.NewMockBookRepository(ctrl)
+			mySQLBookRepoMock := mySqlMocks.NewMockBookRepository(ctrl)
+			esBookRepoMock := esMocks.NewMockBookRepository(ctrl)
 
 			bookService := NewBookService(
 				&repositories.Repository{
-					MySQLBookRepository: bookRepoMock,
+					MySQLBookRepository: mySQLBookRepoMock,
+					ESBookRepository:    esBookRepoMock,
 				},
 			)
 
 			tt.configureMock(confMock{
-				input:        tt.input,
-				output:       tt.output,
-				bookRepoMock: bookRepoMock,
+				input:             tt.input,
+				output:            tt.output,
+				mySQLBookRepoMock: mySQLBookRepoMock,
+				esBookRepoMock:    esBookRepoMock,
 			})
 
 			err := bookService.CreateBook(tt.input.book)
@@ -124,8 +137,8 @@ func TestBookService_GetBook(t *testing.T) {
 		err   error
 	}
 	type confMock struct {
-		output       output
-		bookRepoMock *mocks.MockBookRepository
+		output            output
+		mySQLBookRepoMock *mySqlMocks.MockBookRepository
 	}
 
 	tests := []struct {
@@ -145,7 +158,7 @@ func TestBookService_GetBook(t *testing.T) {
 				err: nil,
 			},
 			configureMock: func(conf confMock) {
-				conf.bookRepoMock.EXPECT().
+				conf.mySQLBookRepoMock.EXPECT().
 					GetAll().
 					Return(
 						conf.output.books,
@@ -165,7 +178,7 @@ func TestBookService_GetBook(t *testing.T) {
 				err: errDatabase,
 			},
 			configureMock: func(conf confMock) {
-				conf.bookRepoMock.EXPECT().
+				conf.mySQLBookRepoMock.EXPECT().
 					GetAll().
 					Return(
 						conf.output.books,
@@ -180,17 +193,17 @@ func TestBookService_GetBook(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bookRepoMock := mocks.NewMockBookRepository(ctrl)
+			mySQLBookRepoMock := mySqlMocks.NewMockBookRepository(ctrl)
 
 			bookService := NewBookService(
 				&repositories.Repository{
-					MySQLBookRepository: bookRepoMock,
+					MySQLBookRepository: mySQLBookRepoMock,
 				},
 			)
 
 			tt.configureMock(confMock{
-				output:       tt.output,
-				bookRepoMock: bookRepoMock,
+				output:            tt.output,
+				mySQLBookRepoMock: mySQLBookRepoMock,
 			})
 
 			got, err := bookService.GetBooks()
@@ -214,9 +227,10 @@ func TestBookService_UpdateBook(t *testing.T) {
 		err error
 	}
 	type confMock struct {
-		input        input
-		output       output
-		bookRepoMock *mocks.MockBookRepository
+		input             input
+		output            output
+		mySQLBookRepoMock *mySqlMocks.MockBookRepository
+		esBookRepoMock    *esMocks.MockBookRepository
 	}
 
 	tests := []struct {
@@ -237,9 +251,13 @@ func TestBookService_UpdateBook(t *testing.T) {
 				err: nil,
 			},
 			configureMock: func(conf confMock) {
-				conf.bookRepoMock.EXPECT().
+				conf.mySQLBookRepoMock.EXPECT().
 					UpdateBook(conf.input.book).
 					Return(conf.output.err)
+
+				conf.esBookRepoMock.EXPECT().
+					UpdateBook(conf.input.book).
+					Return(nil)
 			},
 		},
 		{
@@ -254,7 +272,7 @@ func TestBookService_UpdateBook(t *testing.T) {
 				err: errDatabase,
 			},
 			configureMock: func(conf confMock) {
-				conf.bookRepoMock.EXPECT().
+				conf.mySQLBookRepoMock.EXPECT().
 					UpdateBook(conf.input.book).
 					Return(conf.output.err)
 			},
@@ -266,18 +284,21 @@ func TestBookService_UpdateBook(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			bookRepoMock := mocks.NewMockBookRepository(ctrl)
+			mySQLBookRepoMock := mySqlMocks.NewMockBookRepository(ctrl)
+			esBookRepoMock := esMocks.NewMockBookRepository(ctrl)
 
 			bookService := NewBookService(
 				&repositories.Repository{
-					MySQLBookRepository: bookRepoMock,
+					MySQLBookRepository: mySQLBookRepoMock,
+					ESBookRepository:    esBookRepoMock,
 				},
 			)
 
 			tt.configureMock(confMock{
-				input:        tt.input,
-				output:       tt.output,
-				bookRepoMock: bookRepoMock,
+				input:             tt.input,
+				output:            tt.output,
+				mySQLBookRepoMock: mySQLBookRepoMock,
+				esBookRepoMock:    esBookRepoMock,
 			})
 
 			err := bookService.UpdateBook(tt.input.book)

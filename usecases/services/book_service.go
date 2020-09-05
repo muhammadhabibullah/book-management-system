@@ -1,6 +1,8 @@
 package services
 
 import (
+	"log"
+
 	"book-management-system/entities/models"
 	"book-management-system/repositories"
 	"book-management-system/repositories/elasticsearch"
@@ -12,6 +14,7 @@ type BookService interface {
 	GetBooks() (models.Books, error)
 	CreateBook(*models.Book) error
 	UpdateBook(*models.Book) error
+	SearchBooks(string) (models.Books, error)
 }
 
 type bookService struct {
@@ -32,9 +35,35 @@ func (svc *bookService) GetBooks() (models.Books, error) {
 }
 
 func (svc *bookService) CreateBook(book *models.Book) error {
-	return svc.MySQLBookRepository.CreateBook(book)
+	err := svc.MySQLBookRepository.CreateBook(book)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		err := svc.ESBookRepository.CreateBook(book)
+		if err != nil {
+			log.Printf("error create book in elasticsearch %s", err)
+		}
+	}()
+	return nil
 }
 
 func (svc *bookService) UpdateBook(book *models.Book) error {
-	return svc.MySQLBookRepository.UpdateBook(book)
+	err := svc.MySQLBookRepository.UpdateBook(book)
+	if err != nil {
+		return err
+	}
+
+	go func() {
+		err := svc.ESBookRepository.UpdateBook(book)
+		if err != nil {
+			log.Printf("error update book in elasticsearch %s", err)
+		}
+	}()
+	return nil
+}
+
+func (svc *bookService) SearchBooks(keyword string) (models.Books, error) {
+	return svc.ESBookRepository.SearchBook(keyword)
 }

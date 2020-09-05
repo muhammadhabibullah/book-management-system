@@ -40,9 +40,8 @@ func Init() *elasticsearch.Client {
 		if err != nil {
 			log.Fatalf("Error getting elasticsearch info: %s", err)
 		}
-		defer func() {
-			_ = res.Body.Close()
-		}()
+		defer res.Body.Close()
+
 		if res.IsError() {
 			log.Fatalf("Error elasticsearch info response: %s", res.String())
 		}
