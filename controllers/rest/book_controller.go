@@ -24,9 +24,11 @@ func NewBookController(route *mux.Router, useCase *usecases.UseCase) *BookContro
 	}
 
 	v1Route := route.PathPrefix("/v1").Subrouter()
+
 	v1BookRoute := v1Route.PathPrefix("/book").Subrouter()
 	v1BookRoute.HandleFunc("", ctrl.CreateBook).Methods("POST")
 	v1BookRoute.HandleFunc("", ctrl.GetBooks).Methods("GET")
+	v1BookRoute.HandleFunc("", ctrl.UpdateBook).Methods("PUT")
 
 	return ctrl
 }
@@ -80,4 +82,35 @@ func (ctrl *BookController) GetBooks(res http.ResponseWriter, _ *http.Request) {
 	}
 
 	respondWithJSON(res, http.StatusOK, books)
+}
+
+// UpdateBook handle update book request
+// @Summary Update a book
+// @Description Update a book
+// @Tags Book
+// @Accept json
+// @Produce json
+// @Param request body models.Book true "Request Body"
+// @Success 200 {object} models.Book "Updated"
+// @Failure 400 {object} responses.ErrorResponse "Bad Request"
+// @Failure 500 {object} responses.ErrorResponse "Internal Server Error"
+// @Router /v1/book [put]
+func (ctrl *BookController) UpdateBook(res http.ResponseWriter, req *http.Request) {
+	var book models.Book
+	decoder := json.NewDecoder(req.Body)
+	if err := decoder.Decode(&book); err != nil {
+		respondWithError(res, http.StatusBadRequest, "Invalid request payload")
+		return
+	}
+	defer func() {
+		_ = req.Body.Close()
+	}()
+
+	if err := ctrl.bookService.UpdateBook(&book); err != nil {
+		respondWithError(res, http.StatusInternalServerError,
+			fmt.Sprintf("Failed update book: %s", err.Error()))
+		return
+	}
+
+	respondWithJSON(res, http.StatusOK, book)
 }

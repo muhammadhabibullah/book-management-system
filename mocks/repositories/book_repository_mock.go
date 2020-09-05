@@ -61,3 +61,17 @@ func (mr *MockBookRepositoryMockRecorder) CreateBook(arg0 interface{}) *gomock.C
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBook", reflect.TypeOf((*MockBookRepository)(nil).CreateBook), arg0)
 }
+
+// UpdateBook mocks base method
+func (m *MockBookRepository) UpdateBook(arg0 *models.Book) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "UpdateBook", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// UpdateBook indicates an expected call of UpdateBook
+func (mr *MockBookRepositoryMockRecorder) UpdateBook(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBook", reflect.TypeOf((*MockBookRepository)(nil).UpdateBook), arg0)
+}

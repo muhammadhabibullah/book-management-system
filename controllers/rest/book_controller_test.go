@@ -247,3 +247,127 @@ func TestBookController_GetBook(t *testing.T) {
 		})
 	}
 }
+
+func TestBookController_UpdateBook(t *testing.T) {
+	type input struct {
+		valid              bool
+		requestBody        *models.Book
+		invalidRequestBody models.Books
+	}
+	type output struct {
+		responseBody interface{}
+	}
+	type confMock struct {
+		input input
+		mock  *mocks.MockBookService
+	}
+
+	tests := []struct {
+		name          string
+		input         input
+		output        output
+		configureMock func(confMock)
+	}{
+		{
+			name: "failed: invalid request body",
+			input: input{
+				valid: false,
+				invalidRequestBody: models.Books{
+					{
+						Name: "C++",
+						ISBN: "1234",
+					},
+				},
+			},
+			output: output{
+				responseBody: responses.ErrorResponse{
+					"error": "Invalid request payload",
+				},
+			},
+			configureMock: func(confMock) {},
+		},
+		{
+			name: "failed: service error",
+			input: input{
+				valid: true,
+				requestBody: &models.Book{
+					Name: "C++",
+					ISBN: "1234",
+				},
+			},
+			output: output{
+				responseBody: responses.ErrorResponse{
+					"error": fmt.Sprintf("Failed update book: %s", "service error"),
+				},
+			},
+			configureMock: func(conf confMock) {
+				conf.mock.EXPECT().
+					UpdateBook(gomock.Any()).
+					SetArg(0, *conf.input.requestBody).
+					Return(errors.New("service error"))
+			},
+		},
+		{
+			name: "success: update book",
+			input: input{
+				valid: true,
+				requestBody: &models.Book{
+					Name: "C++",
+					ISBN: "1234",
+				},
+			},
+			output: output{
+				responseBody: models.Book{
+					Name: "C++",
+					ISBN: "1234",
+				},
+			},
+			configureMock: func(conf confMock) {
+				conf.mock.EXPECT().
+					UpdateBook(gomock.Any()).
+					SetArg(0, *conf.input.requestBody).
+					Return(nil)
+			},
+		},
+	}
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			var marshalledRequestBody []byte
+			if tt.input.valid {
+				marshalledRequestBody, _ = json.Marshal(tt.input.requestBody)
+			} else {
+				marshalledRequestBody, _ = json.Marshal(tt.input.invalidRequestBody)
+			}
+
+			req, _ := http.NewRequest(
+				"PUT",
+				"/v1/book",
+				bytes.NewBuffer(marshalledRequestBody),
+			)
+			resp := httptest.NewRecorder()
+
+			bookServiceMock := mocks.NewMockBookService(ctrl)
+			tt.configureMock(confMock{
+				input: tt.input,
+				mock:  bookServiceMock,
+			})
+
+			bookController := &BookController{
+				bookService: bookServiceMock,
+			}
+
+			bookController.UpdateBook(resp, req)
+
+			got := resp.Body.String()
+			expected, _ := json.Marshal(tt.output.responseBody)
+			if got != string(expected) {
+				t.Errorf("got response body %s\n expected %s",
+					got, string(expected))
+			}
+		})
+	}
+}

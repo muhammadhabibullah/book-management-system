@@ -10,6 +10,7 @@ import (
 type BookRepository interface {
 	GetAll() (models.Books, error)
 	CreateBook(*models.Book) error
+	UpdateBook(*models.Book) error
 }
 
 type bookRepository struct {
@@ -32,5 +33,10 @@ func (repo *bookRepository) GetAll() (models.Books, error) {
 
 func (repo *bookRepository) CreateBook(book *models.Book) error {
 	query := repo.db.Create(book)
+	return query.Error
+}
+
+func (repo *bookRepository) UpdateBook(book *models.Book) error {
+	query := repo.db.Updates(book)
 	return query.Error
 }
