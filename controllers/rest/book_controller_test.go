@@ -96,8 +96,7 @@ func TestBookController_CreateBook(t *testing.T) {
 			},
 			configureMock: func(conf confMock) {
 				conf.mock.EXPECT().
-					CreateBook(gomock.Any()).
-					SetArg(0, *conf.input.requestBody).
+					CreateBook(conf.input.requestBody).
 					Return(errors.New("service error"))
 			},
 		},
@@ -118,8 +117,7 @@ func TestBookController_CreateBook(t *testing.T) {
 			},
 			configureMock: func(conf confMock) {
 				conf.mock.EXPECT().
-					CreateBook(gomock.Any()).
-					SetArg(0, *conf.input.requestBody).
+					CreateBook(conf.input.requestBody).
 					Return(nil)
 			},
 		},
@@ -302,8 +300,7 @@ func TestBookController_UpdateBook(t *testing.T) {
 			},
 			configureMock: func(conf confMock) {
 				conf.mock.EXPECT().
-					UpdateBook(gomock.Any()).
-					SetArg(0, *conf.input.requestBody).
+					UpdateBook(conf.input.requestBody).
 					Return(errors.New("service error"))
 			},
 		},
@@ -324,8 +321,7 @@ func TestBookController_UpdateBook(t *testing.T) {
 			},
 			configureMock: func(conf confMock) {
 				conf.mock.EXPECT().
-					UpdateBook(gomock.Any()).
-					SetArg(0, *conf.input.requestBody).
+					UpdateBook(conf.input.requestBody).
 					Return(nil)
 			},
 		},
