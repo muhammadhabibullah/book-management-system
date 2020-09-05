@@ -2,14 +2,12 @@
 // Source: ./repositories/mysql/mysql_book_repository.go
 
 // Package mocks is a generated GoMock package.
-package mysql
+package mocks
 
 import (
-	"reflect"
-
-	"github.com/golang/mock/gomock"
-
-	"book-management-system/entities/models"
+	models "book-management-system/entities/models"
+	gomock "github.com/golang/mock/gomock"
+	reflect "reflect"
 )
 
 // MockBookRepository is a mock of BookRepository interface
