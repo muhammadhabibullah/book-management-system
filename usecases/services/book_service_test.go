@@ -28,6 +28,9 @@ func TestNewBookService(t *testing.T) {
 		t.Errorf("NewBookService returns %+v\n expected %+v",
 			got, expected)
 	}
+	if _, ok := got.(BookService); !ok {
+		t.Errorf("NewBookService returns object not implements BookService")
+	}
 }
 
 var errDatabase = errors.New("error database")
