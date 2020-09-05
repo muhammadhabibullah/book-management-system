@@ -17,7 +17,7 @@ FROM alpine
 WORKDIR /usr/local/bin
 
 COPY --from=build /build/book_management_system .
-COPY --from=build /build/configs ./configs
+COPY --from=build /build/configs/config.json ./configs/config.json
 
 RUN chmod +x book_management_system
 
