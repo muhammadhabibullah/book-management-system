@@ -10,6 +10,7 @@ import (
 type BookService interface {
 	GetBooks() (models.Books, error)
 	CreateBook(*models.Book) error
+	UpdateBook(*models.Book) error
 }
 
 type bookService struct {
@@ -29,4 +30,8 @@ func (svc *bookService) GetBooks() (models.Books, error) {
 
 func (svc *bookService) CreateBook(book *models.Book) error {
 	return svc.BookRepository.CreateBook(book)
+}
+
+func (svc *bookService) UpdateBook(book *models.Book) error {
+	return svc.BookRepository.UpdateBook(book)
 }

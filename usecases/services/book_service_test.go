@@ -205,3 +205,86 @@ func TestBookService_GetBook(t *testing.T) {
 		})
 	}
 }
+
+func TestBookService_UpdateBook(t *testing.T) {
+	type input struct {
+		book *models.Book
+	}
+	type output struct {
+		err error
+	}
+	type confMock struct {
+		input        input
+		output       output
+		bookRepoMock *mocks.MockBookRepository
+	}
+
+	tests := []struct {
+		name          string
+		input         input
+		output        output
+		configureMock func(confMock)
+	}{
+		{
+			name: "success update book",
+			input: input{
+				book: &models.Book{
+					Name: "C++",
+					ISBN: "1234",
+				},
+			},
+			output: output{
+				err: nil,
+			},
+			configureMock: func(conf confMock) {
+				conf.bookRepoMock.EXPECT().
+					UpdateBook(conf.input.book).
+					Return(conf.output.err)
+			},
+		},
+		{
+			name: "failed update book",
+			input: input{
+				book: &models.Book{
+					Name: "C++",
+					ISBN: "1234",
+				},
+			},
+			output: output{
+				err: errDatabase,
+			},
+			configureMock: func(conf confMock) {
+				conf.bookRepoMock.EXPECT().
+					UpdateBook(conf.input.book).
+					Return(conf.output.err)
+			},
+		},
+	}
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			bookRepoMock := mocks.NewMockBookRepository(ctrl)
+
+			bookService := NewBookService(
+				&repositories.Repository{
+					BookRepository: bookRepoMock,
+				},
+			)
+
+			tt.configureMock(confMock{
+				input:        tt.input,
+				output:       tt.output,
+				bookRepoMock: bookRepoMock,
+			})
+
+			err := bookService.UpdateBook(tt.input.book)
+			if !errors.Is(err, tt.output.err) {
+				t.Errorf("unexpected error %+v, expected %+v",
+					err, tt.output.err)
+			}
+		})
+	}
+}
