@@ -41,7 +41,7 @@ func (svc *bookService) CreateBook(book *models.Book) error {
 	}
 
 	go func() {
-		err := svc.ESBookRepository.CreateBook(book)
+		err := svc.ESBookRepository.IndexBook(book)
 		if err != nil {
 			log.Printf("error create book in elasticsearch %s", err)
 		}
@@ -56,7 +56,7 @@ func (svc *bookService) UpdateBook(book *models.Book) error {
 	}
 
 	go func() {
-		err := svc.ESBookRepository.UpdateBook(book)
+		err := svc.ESBookRepository.IndexBook(book)
 		if err != nil {
 			log.Printf("error update book in elasticsearch %s", err)
 		}

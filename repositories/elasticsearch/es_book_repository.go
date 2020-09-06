@@ -1,6 +1,10 @@
 package elasticsearch
 
 import (
+	"encoding/json"
+	"strconv"
+	"strings"
+
 	"github.com/elastic/go-elasticsearch/v8"
 
 	"book-management-system/entities/models"
@@ -8,33 +12,66 @@ import (
 
 // BookRepository interface
 type BookRepository interface {
-	CreateBook(*models.Book) error
-	UpdateBook(*models.Book) error
+	IndexBook(*models.Book) error
 	SearchBook(string) (models.Books, error)
 }
 
 type bookRepository struct {
-	es *elasticsearch.Client
+	es    *elasticsearch.Client
+	index string
 }
 
 // NewBookRepository returns new BookRepository
 func NewBookRepository(es *elasticsearch.Client) BookRepository {
 	return &bookRepository{
-		es: es,
+		es:    es,
+		index: "books",
 	}
 }
 
-// TODO
-func (repo *bookRepository) CreateBook(*models.Book) error {
+func (repo *bookRepository) IndexBook(book *models.Book) error {
+	bookBytes, err := json.Marshal(book)
+	if err != nil {
+		return err
+	}
+
+	res, err := repo.es.Index(
+		repo.index,
+		strings.NewReader(string(bookBytes)),
+		es.Index.WithDocumentID(strconv.Itoa(int(book.ID))),
+		es.Index.WithPretty(),
+	)
+	if err != nil {
+		return err
+	}
+	defer res.Body.Close()
+
 	return nil
 }
 
-// TODO
-func (repo *bookRepository) UpdateBook(*models.Book) error {
-	return nil
-}
+func (repo *bookRepository) SearchBook(keyword string) (models.Books, error) {
+	res, err := repo.es.Search(
+		es.Search.WithIndex(repo.index),
+		es.Search.WithQuery(keyword),
+		es.Search.WithPretty(),
+	)
+	if err != nil {
+		return models.Books{}, err
+	}
+	defer res.Body.Close()
 
-// TODO
-func (repo *bookRepository) SearchBook(string) (models.Books, error) {
-	return nil, nil
+	decodedRes := make(map[string]interface{})
+	if err := json.NewDecoder(res.Body).Decode(&decodedRes); err != nil {
+		return models.Books{}, err
+	}
+
+	var books models.Books
+	for _, hit := range decodedRes["hits"].(map[string]interface{})["hits"].([]interface{}) {
+		source, _ := json.Marshal(hit.(map[string]interface{})["_source"])
+		var book models.Book
+		_ = json.Unmarshal(source, &book)
+		books = append(books, book)
+	}
+
+	return books, nil
 }
