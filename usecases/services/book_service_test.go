@@ -77,7 +77,7 @@ func TestBookService_CreateBook(t *testing.T) {
 					Return(conf.output.err)
 
 				conf.esBookRepoMock.EXPECT().
-					CreateBook(conf.input.book).
+					IndexBook(conf.input.book).
 					Return(nil)
 			},
 		},
@@ -147,7 +147,7 @@ func TestBookService_GetBook(t *testing.T) {
 		configureMock func(confMock)
 	}{
 		{
-			name: "success get book",
+			name: "success get books",
 			output: output{
 				books: models.Books{
 					{
@@ -169,13 +169,8 @@ func TestBookService_GetBook(t *testing.T) {
 		{
 			name: "failed get book",
 			output: output{
-				books: models.Books{
-					{
-						Name: "C++",
-						ISBN: "1234",
-					},
-				},
-				err: errDatabase,
+				books: models.Books{},
+				err:   errDatabase,
 			},
 			configureMock: func(conf confMock) {
 				conf.mySQLBookRepoMock.EXPECT().
@@ -256,7 +251,7 @@ func TestBookService_UpdateBook(t *testing.T) {
 					Return(conf.output.err)
 
 				conf.esBookRepoMock.EXPECT().
-					UpdateBook(conf.input.book).
+					IndexBook(conf.input.book).
 					Return(nil)
 			},
 		},
@@ -305,6 +300,101 @@ func TestBookService_UpdateBook(t *testing.T) {
 			if !errors.Is(err, tt.output.err) {
 				t.Errorf("unexpected error %+v, expected %+v",
 					err, tt.output.err)
+			}
+		})
+	}
+}
+
+func TestBookService_SearchBook(t *testing.T) {
+	type input struct {
+		keyword string
+	}
+	type output struct {
+		books models.Books
+		err   error
+	}
+	type confMock struct {
+		input          input
+		output         output
+		esBookRepoMock *esMocks.MockBookRepository
+	}
+
+	tests := []struct {
+		name          string
+		input         input
+		output        output
+		configureMock func(confMock)
+	}{
+		{
+			name: "success search books",
+			input: input{
+				keyword: "C++",
+			},
+			output: output{
+				books: models.Books{
+					{
+						Name: "C++",
+						ISBN: "1234",
+					},
+				},
+				err: nil,
+			},
+			configureMock: func(conf confMock) {
+				conf.esBookRepoMock.EXPECT().
+					SearchBook(conf.input.keyword).
+					Return(
+						conf.output.books,
+						conf.output.err,
+					)
+			},
+		},
+		{
+			name: "failed search books",
+			input: input{
+				keyword: "C++",
+			},
+			output: output{
+				books: models.Books{},
+				err:   errDatabase,
+			},
+			configureMock: func(conf confMock) {
+				conf.esBookRepoMock.EXPECT().
+					SearchBook(conf.input.keyword).
+					Return(
+						conf.output.books,
+						conf.output.err,
+					)
+			},
+		},
+	}
+
+	ctrl := gomock.NewController(t)
+	defer ctrl.Finish()
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			esBookRepoMock := esMocks.NewMockBookRepository(ctrl)
+
+			bookService := NewBookService(
+				&repositories.Repository{
+					ESBookRepository: esBookRepoMock,
+				},
+			)
+
+			tt.configureMock(confMock{
+				input:          tt.input,
+				output:         tt.output,
+				esBookRepoMock: esBookRepoMock,
+			})
+
+			got, err := bookService.SearchBooks(tt.input.keyword)
+			if !errors.Is(err, tt.output.err) {
+				t.Errorf("unexpected error %+v, expected %+v",
+					err, tt.output.err)
+			}
+			if !reflect.DeepEqual(got, tt.output.books) {
+				t.Errorf("result got %+v, expected %+v",
+					got, tt.output.books)
 			}
 		})
 	}
