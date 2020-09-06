@@ -15,9 +15,10 @@ var (
 
 // Configs consists all configuration
 type Configs struct {
-	Production bool
-	Server     ServerConfig
-	Mysql      MySQLConfig
+	Production    bool
+	Server        ServerConfig
+	Mysql         MySQLConfig
+	ElasticSearch ESConfig
 }
 
 // ServerConfig consists server configuration
@@ -38,6 +39,14 @@ type MySQLConfig struct {
 	MaxIdleConn     int
 	MaxOpenConn     int
 	ConnMaxLifetime int
+}
+
+// ESConfig consists ElasticSearch configuration
+type ESConfig struct {
+	Address  string
+	IsAuth   bool
+	Username string
+	Password string
 }
 
 // GetConfig return Configs object read from config.json file

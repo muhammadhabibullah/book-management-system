@@ -18,6 +18,14 @@
                     "Book"
                 ],
                 "summary": "Get all books",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Search",
+                        "name": "search",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",

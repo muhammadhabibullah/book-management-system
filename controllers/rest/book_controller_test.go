@@ -165,20 +165,29 @@ func TestBookController_CreateBook(t *testing.T) {
 }
 
 func TestBookController_GetBook(t *testing.T) {
+	type input struct {
+		httpRequestURL string
+		query          string
+	}
 	type output struct {
 		responseBody interface{}
 	}
 	type confMock struct {
-		mock *mocks.MockBookService
+		input input
+		mock  *mocks.MockBookService
 	}
 
 	tests := []struct {
 		name          string
+		input         input
 		output        output
 		configureMock func(confMock)
 	}{
 		{
 			name: "failed: service error",
+			input: input{
+				httpRequestURL: "/v1/book",
+			},
 			output: output{
 				responseBody: responses.ErrorResponse{
 					"error": fmt.Sprintf("Failed get books: %s", "service error"),
@@ -191,7 +200,10 @@ func TestBookController_GetBook(t *testing.T) {
 			},
 		},
 		{
-			name: "success: create book",
+			name: "success: get books",
+			input: input{
+				httpRequestURL: "/v1/book",
+			},
 			output: output{
 				responseBody: models.Books{
 					{
@@ -211,6 +223,31 @@ func TestBookController_GetBook(t *testing.T) {
 					}, nil)
 			},
 		},
+		{
+			name: "success: search books",
+			input: input{
+				httpRequestURL: "/v1/book?search=1234",
+				query:          "1234",
+			},
+			output: output{
+				responseBody: models.Books{
+					{
+						Name: "C++",
+						ISBN: "1234",
+					},
+				},
+			},
+			configureMock: func(conf confMock) {
+				conf.mock.EXPECT().
+					SearchBooks(conf.input.query).
+					Return(models.Books{
+						{
+							Name: "C++",
+							ISBN: "1234",
+						},
+					}, nil)
+			},
+		},
 	}
 
 	ctrl := gomock.NewController(t)
@@ -220,14 +257,15 @@ func TestBookController_GetBook(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			req, _ := http.NewRequest(
 				"GET",
-				"/v1/book",
+				tt.input.httpRequestURL,
 				nil,
 			)
 			resp := httptest.NewRecorder()
 
 			bookServiceMock := mocks.NewMockBookService(ctrl)
 			tt.configureMock(confMock{
-				mock: bookServiceMock,
+				input: tt.input,
+				mock:  bookServiceMock,
 			})
 
 			bookController := &BookController{

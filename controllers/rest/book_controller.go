@@ -67,11 +67,19 @@ func (ctrl *BookController) CreateBook(res http.ResponseWriter, req *http.Reques
 // @Tags Book
 // @Accept json
 // @Produce json
+// @Param search query string false "Search"
 // @Success 200 {object} models.Books "OK"
 // @Failure 500 {object} responses.ErrorResponse "Internal Server Error"
 // @Router /v1/book [get]
-func (ctrl *BookController) GetBooks(res http.ResponseWriter, _ *http.Request) {
-	books, err := ctrl.bookService.GetBooks()
+func (ctrl *BookController) GetBooks(res http.ResponseWriter, req *http.Request) {
+	var books models.Books
+	var err error
+	if keyword, ok := req.URL.Query()["search"]; ok {
+		books, err = ctrl.bookService.SearchBooks(keyword[0])
+	} else {
+		books, err = ctrl.bookService.GetBooks()
+	}
+
 	if err != nil {
 		respondWithError(res, http.StatusInternalServerError,
 			fmt.Sprintf("Failed get books: %s", err.Error()))
