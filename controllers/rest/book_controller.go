@@ -74,8 +74,8 @@ func (ctrl *BookController) CreateBook(res http.ResponseWriter, req *http.Reques
 func (ctrl *BookController) GetBooks(res http.ResponseWriter, req *http.Request) {
 	var books models.Books
 	var err error
-	if keyword, ok := req.URL.Query()["search"]; ok {
-		books, err = ctrl.bookService.SearchBooks(keyword[0])
+	if keyword := req.URL.Query().Get("search"); keyword != "" {
+		books, err = ctrl.bookService.SearchBooks(keyword)
 	} else {
 		books, err = ctrl.bookService.GetBooks()
 	}

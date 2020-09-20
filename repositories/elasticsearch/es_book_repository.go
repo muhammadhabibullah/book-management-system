@@ -65,7 +65,7 @@ func (repo *bookRepository) SearchBook(keyword string) (models.Books, error) {
 		return models.Books{}, err
 	}
 
-	var books models.Books
+	books := make(models.Books, 0)
 	for _, hit := range decodedRes["hits"].(map[string]interface{})["hits"].([]interface{}) {
 		source, _ := json.Marshal(hit.(map[string]interface{})["_source"])
 		var book models.Book
