@@ -69,7 +69,10 @@ func (repo *bookRepository) SearchBook(keyword string) (models.Books, error) {
 	for _, hit := range decodedRes["hits"].(map[string]interface{})["hits"].([]interface{}) {
 		source, _ := json.Marshal(hit.(map[string]interface{})["_source"])
 		var book models.Book
-		_ = json.Unmarshal(source, &book)
+		err = json.Unmarshal(source, &book)
+		if err != nil {
+			return models.Books{}, err
+		}
 		books = append(books, book)
 	}
 

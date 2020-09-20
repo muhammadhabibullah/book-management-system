@@ -6,10 +6,10 @@ import (
 	"regexp"
 	"testing"
 
-	"book-management-system/entities/models"
-
 	"github.com/DATA-DOG/go-sqlmock"
 	"gorm.io/gorm"
+
+	"book-management-system/entities/models"
 )
 
 func TestNewBookRepository(t *testing.T) {
