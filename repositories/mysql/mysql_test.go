@@ -22,7 +22,6 @@ func setupTestSuite() (*gorm.DB, sqlmock.Sqlmock, error) {
 	if err != nil {
 		return nil, nil, err
 	}
-	//defer dbMock.Close() TODO: research if its really need to be enabled
 
 	gormDBMock, err := gorm.Open(mysql.New(mysql.Config{
 		Conn:                      dbMock,
@@ -36,4 +35,9 @@ func setupTestSuite() (*gorm.DB, sqlmock.Sqlmock, error) {
 	}
 
 	return gormDBMock, mock, nil
+}
+
+func closeDB(gormDBMock *gorm.DB) {
+	dbMock, _ := gormDBMock.DB()
+	dbMock.Close()
 }
