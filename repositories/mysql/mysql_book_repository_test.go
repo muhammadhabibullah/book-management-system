@@ -93,6 +93,7 @@ func TestBookRepository_GetAll(t *testing.T) {
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
+	defer closeDB(dbMock)
 
 	for _, tt := range tests {
 		tt.configureMock(confMock{
@@ -289,6 +290,7 @@ func TestBookRepository_UpdateBook(t *testing.T) {
 	if err != nil {
 		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
 	}
+	defer closeDB(dbMock)
 
 	for _, tt := range tests {
 		tt.configureMock(confMock{
