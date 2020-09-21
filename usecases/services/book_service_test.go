@@ -3,6 +3,7 @@ package services
 import (
 	"errors"
 	"reflect"
+	"sync"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -47,55 +48,61 @@ func TestBookService_CreateBook(t *testing.T) {
 	type output struct {
 		err error
 	}
-	type confMock struct {
-		input             input
-		output            output
+	type mockConfig struct {
+		wg                *sync.WaitGroup
+		given             input
+		expected          output
 		mySQLBookRepoMock *mySqlMocks.MockBookRepository
 		esBookRepoMock    *esMocks.MockBookRepository
 	}
 
 	tests := []struct {
-		name          string
-		input         input
-		output        output
-		configureMock func(confMock)
+		name           string
+		givenInput     input
+		expectedOutput output
+		configureMock  func(mockConfig)
 	}{
 		{
 			name: "success create book",
-			input: input{
+			givenInput: input{
 				book: &models.Book{
 					Name: "C++",
 					ISBN: "1234",
 				},
 			},
-			output: output{
+			expectedOutput: output{
 				err: nil,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.mySQLBookRepoMock.EXPECT().
-					CreateBook(conf.input.book).
-					Return(conf.output.err)
+					CreateBook(conf.given.book).
+					Return(conf.expected.err)
+
+				conf.wg.Add(1)
 
 				conf.esBookRepoMock.EXPECT().
-					IndexBook(conf.input.book).
-					Return(nil)
+					IndexBook(conf.given.book).
+					DoAndReturn(func(*models.Book) error {
+						conf.wg.Done()
+						return nil
+					})
 			},
 		},
 		{
 			name: "failed create book",
-			input: input{
+			givenInput: input{
 				book: &models.Book{
 					Name: "C++",
 					ISBN: "1234",
 				},
 			},
-			output: output{
+			expectedOutput: output{
 				err: errDatabase,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.mySQLBookRepoMock.EXPECT().
-					CreateBook(conf.input.book).
-					Return(conf.output.err)
+					CreateBook(conf.given.book).
+					Return(conf.expected.err)
 			},
 		},
 	}
@@ -114,18 +121,21 @@ func TestBookService_CreateBook(t *testing.T) {
 					ESBookRepository:    esBookRepoMock,
 				},
 			)
+			wg := sync.WaitGroup{}
 
-			tt.configureMock(confMock{
-				input:             tt.input,
-				output:            tt.output,
+			tt.configureMock(mockConfig{
+				wg:                &wg,
+				given:             tt.givenInput,
+				expected:          tt.expectedOutput,
 				mySQLBookRepoMock: mySQLBookRepoMock,
 				esBookRepoMock:    esBookRepoMock,
 			})
 
-			err := bookService.CreateBook(tt.input.book)
-			if !errors.Is(err, tt.output.err) {
+			err := bookService.CreateBook(tt.givenInput.book)
+			wg.Wait()
+			if expectedError := tt.expectedOutput.err; !errors.Is(err, expectedError) {
 				t.Errorf("unexpected error %+v, expected %+v",
-					err, tt.output.err)
+					err, expectedError)
 			}
 		})
 	}
@@ -136,19 +146,19 @@ func TestBookService_GetBook(t *testing.T) {
 		books models.Books
 		err   error
 	}
-	type confMock struct {
-		output            output
+	type mockConfig struct {
+		expected          output
 		mySQLBookRepoMock *mySqlMocks.MockBookRepository
 	}
 
 	tests := []struct {
-		name          string
-		output        output
-		configureMock func(confMock)
+		name           string
+		expectedOutput output
+		configureMock  func(mockConfig)
 	}{
 		{
 			name: "success get books",
-			output: output{
+			expectedOutput: output{
 				books: models.Books{
 					{
 						Name: "C++",
@@ -157,27 +167,27 @@ func TestBookService_GetBook(t *testing.T) {
 				},
 				err: nil,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.mySQLBookRepoMock.EXPECT().
 					GetAll().
 					Return(
-						conf.output.books,
-						conf.output.err,
+						conf.expected.books,
+						conf.expected.err,
 					)
 			},
 		},
 		{
 			name: "failed get book",
-			output: output{
+			expectedOutput: output{
 				books: models.Books{},
 				err:   errDatabase,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.mySQLBookRepoMock.EXPECT().
 					GetAll().
 					Return(
-						conf.output.books,
-						conf.output.err,
+						conf.expected.books,
+						conf.expected.err,
 					)
 			},
 		},
@@ -196,19 +206,19 @@ func TestBookService_GetBook(t *testing.T) {
 				},
 			)
 
-			tt.configureMock(confMock{
-				output:            tt.output,
+			tt.configureMock(mockConfig{
+				expected:          tt.expectedOutput,
 				mySQLBookRepoMock: mySQLBookRepoMock,
 			})
 
-			got, err := bookService.GetBooks()
-			if !errors.Is(err, tt.output.err) {
+			books, err := bookService.GetBooks()
+			if expectedError := tt.expectedOutput.err; !errors.Is(err, expectedError) {
 				t.Errorf("unexpected error %+v, expected %+v",
-					err, tt.output.err)
+					err, expectedError)
 			}
-			if !reflect.DeepEqual(got, tt.output.books) {
-				t.Errorf("result got %+v, expected %+v",
-					got, tt.output.books)
+			if expectedBooks := tt.expectedOutput.books; !reflect.DeepEqual(books, expectedBooks) {
+				t.Errorf("got books %+v, expected %+v",
+					books, expectedBooks)
 			}
 		})
 	}
@@ -221,55 +231,61 @@ func TestBookService_UpdateBook(t *testing.T) {
 	type output struct {
 		err error
 	}
-	type confMock struct {
-		input             input
-		output            output
+	type mockConfig struct {
+		wg                *sync.WaitGroup
+		given             input
+		expected          output
 		mySQLBookRepoMock *mySqlMocks.MockBookRepository
 		esBookRepoMock    *esMocks.MockBookRepository
 	}
 
 	tests := []struct {
-		name          string
-		input         input
-		output        output
-		configureMock func(confMock)
+		name           string
+		givenInput     input
+		expectedOutput output
+		configureMock  func(mockConfig)
 	}{
 		{
 			name: "success update book",
-			input: input{
+			givenInput: input{
 				book: &models.Book{
 					Name: "C++",
 					ISBN: "1234",
 				},
 			},
-			output: output{
+			expectedOutput: output{
 				err: nil,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.mySQLBookRepoMock.EXPECT().
-					UpdateBook(conf.input.book).
-					Return(conf.output.err)
+					UpdateBook(conf.given.book).
+					Return(conf.expected.err)
+
+				conf.wg.Add(1)
 
 				conf.esBookRepoMock.EXPECT().
-					IndexBook(conf.input.book).
-					Return(nil)
+					IndexBook(conf.given.book).
+					DoAndReturn(func(*models.Book) error {
+						conf.wg.Done()
+						return nil
+					})
 			},
 		},
 		{
 			name: "failed update book",
-			input: input{
+			givenInput: input{
 				book: &models.Book{
 					Name: "C++",
 					ISBN: "1234",
 				},
 			},
-			output: output{
+			expectedOutput: output{
 				err: errDatabase,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.mySQLBookRepoMock.EXPECT().
-					UpdateBook(conf.input.book).
-					Return(conf.output.err)
+					UpdateBook(conf.given.book).
+					Return(conf.expected.err)
 			},
 		},
 	}
@@ -288,18 +304,21 @@ func TestBookService_UpdateBook(t *testing.T) {
 					ESBookRepository:    esBookRepoMock,
 				},
 			)
+			wg := sync.WaitGroup{}
 
-			tt.configureMock(confMock{
-				input:             tt.input,
-				output:            tt.output,
+			tt.configureMock(mockConfig{
+				wg:                &wg,
+				given:             tt.givenInput,
+				expected:          tt.expectedOutput,
 				mySQLBookRepoMock: mySQLBookRepoMock,
 				esBookRepoMock:    esBookRepoMock,
 			})
 
-			err := bookService.UpdateBook(tt.input.book)
-			if !errors.Is(err, tt.output.err) {
+			err := bookService.UpdateBook(tt.givenInput.book)
+			wg.Wait()
+			if expectedError := tt.expectedOutput.err; !errors.Is(err, expectedError) {
 				t.Errorf("unexpected error %+v, expected %+v",
-					err, tt.output.err)
+					err, expectedError)
 			}
 		})
 	}
@@ -313,24 +332,24 @@ func TestBookService_SearchBook(t *testing.T) {
 		books models.Books
 		err   error
 	}
-	type confMock struct {
-		input          input
-		output         output
+	type mockConfig struct {
+		given          input
+		expected       output
 		esBookRepoMock *esMocks.MockBookRepository
 	}
 
 	tests := []struct {
-		name          string
-		input         input
-		output        output
-		configureMock func(confMock)
+		name           string
+		givenInput     input
+		expectedOutput output
+		configureMock  func(mockConfig)
 	}{
 		{
 			name: "success search books",
-			input: input{
+			givenInput: input{
 				keyword: "C++",
 			},
-			output: output{
+			expectedOutput: output{
 				books: models.Books{
 					{
 						Name: "C++",
@@ -339,30 +358,30 @@ func TestBookService_SearchBook(t *testing.T) {
 				},
 				err: nil,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.esBookRepoMock.EXPECT().
-					SearchBook(conf.input.keyword).
+					SearchBook(conf.given.keyword).
 					Return(
-						conf.output.books,
-						conf.output.err,
+						conf.expected.books,
+						conf.expected.err,
 					)
 			},
 		},
 		{
 			name: "failed search books",
-			input: input{
+			givenInput: input{
 				keyword: "C++",
 			},
-			output: output{
+			expectedOutput: output{
 				books: models.Books{},
 				err:   errDatabase,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.esBookRepoMock.EXPECT().
-					SearchBook(conf.input.keyword).
+					SearchBook(conf.given.keyword).
 					Return(
-						conf.output.books,
-						conf.output.err,
+						conf.expected.books,
+						conf.expected.err,
 					)
 			},
 		},
@@ -381,20 +400,20 @@ func TestBookService_SearchBook(t *testing.T) {
 				},
 			)
 
-			tt.configureMock(confMock{
-				input:          tt.input,
-				output:         tt.output,
+			tt.configureMock(mockConfig{
+				given:          tt.givenInput,
+				expected:       tt.expectedOutput,
 				esBookRepoMock: esBookRepoMock,
 			})
 
-			got, err := bookService.SearchBooks(tt.input.keyword)
-			if !errors.Is(err, tt.output.err) {
+			books, err := bookService.SearchBooks(tt.givenInput.keyword)
+			if expectedError := tt.expectedOutput.err; !errors.Is(err, expectedError) {
 				t.Errorf("unexpected error %+v, expected %+v",
-					err, tt.output.err)
+					err, expectedError)
 			}
-			if !reflect.DeepEqual(got, tt.output.books) {
-				t.Errorf("result got %+v, expected %+v",
-					got, tt.output.books)
+			if expectedBooks := tt.expectedOutput.books; !reflect.DeepEqual(books, expectedBooks) {
+				t.Errorf("got books %+v, expected %+v",
+					books, expectedBooks)
 			}
 		})
 	}
