@@ -31,22 +31,22 @@ func TestBookRepository_GetAll(t *testing.T) {
 		books models.Books
 		err   error
 	}
-	type confMock struct {
-		output output
-		mock   sqlmock.Sqlmock
+	type mockConfig struct {
+		expected output
+		mock     sqlmock.Sqlmock
 	}
 
 	queryRgx := regexp.QuoteMeta("SELECT * FROM `books` WHERE `books`.`deleted_at` IS NULL")
 	errDatabase := errors.New("error")
 
 	tests := []struct {
-		name          string
-		output        output
-		configureMock func(confMock)
+		name           string
+		expectedOutput output
+		configureMock  func(mockConfig)
 	}{
 		{
 			name: "success get all books",
-			output: output{
+			expectedOutput: output{
 				books: models.Books{
 					{
 						Model: gorm.Model{
@@ -58,33 +58,36 @@ func TestBookRepository_GetAll(t *testing.T) {
 				},
 				err: nil,
 			},
-			configureMock: func(conf confMock) {
-				rows := sqlmock.NewRows([]string{"id", "name", "isbn"}).
-					AddRow(1, "Book", "1234")
+			configureMock: func(conf mockConfig) {
+				rows := sqlmock.NewRows([]string{"id", "name", "isbn"})
+				for _, book := range conf.expected.books {
+					rows.AddRow(book.ID, book.Name, book.ISBN)
+				}
+
 				conf.mock.ExpectQuery(queryRgx).
 					WillReturnRows(rows)
 			},
 		},
 		{
 			name: "no books found",
-			output: output{
+			expectedOutput: output{
 				books: models.Books{},
 				err:   nil,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.mock.ExpectQuery(queryRgx).
 					WillReturnRows(&sqlmock.Rows{})
 			},
 		},
 		{
 			name: "error database",
-			output: output{
+			expectedOutput: output{
 				books: models.Books{},
 				err:   errDatabase,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.mock.ExpectQuery(queryRgx).
-					WillReturnError(errDatabase)
+					WillReturnError(conf.expected.err)
 			},
 		},
 	}
@@ -96,9 +99,9 @@ func TestBookRepository_GetAll(t *testing.T) {
 	defer closeDB(dbMock)
 
 	for _, tt := range tests {
-		tt.configureMock(confMock{
-			output: tt.output,
-			mock:   mock,
+		tt.configureMock(mockConfig{
+			expected: tt.expectedOutput,
+			mock:     mock,
 		})
 
 		repo := bookRepository{
@@ -106,13 +109,13 @@ func TestBookRepository_GetAll(t *testing.T) {
 		}
 
 		books, err := repo.GetAll()
-		if expectedErr := tt.output.err; !errors.Is(err, tt.output.err) {
+		if expectedError := tt.expectedOutput.err; !errors.Is(err, expectedError) {
 			t.Errorf("GetAll() got error: %v\nexpected: %v",
-				err, expectedErr)
+				err, expectedError)
 		}
-		if expectedBooks := tt.output.books; err == nil && !reflect.DeepEqual(books, expectedBooks) {
-			t.Errorf("GetAll() got books: %+v with type %T\nexpected: %+v with type %T",
-				books, books, expectedBooks, expectedBooks)
+		if expectedBooks := tt.expectedOutput.books; err == nil && !reflect.DeepEqual(books, expectedBooks) {
+			t.Errorf("GetAll() got books: %+v \nexpected: %+v",
+				books, expectedBooks)
 		}
 	}
 }
@@ -124,62 +127,62 @@ func TestBookRepository_CreateBook(t *testing.T) {
 	type output struct {
 		err error
 	}
-	type confMock struct {
-		input  input
-		output output
-		mock   sqlmock.Sqlmock
+	type mockConfig struct {
+		given    input
+		expected output
+		mock     sqlmock.Sqlmock
 	}
 
 	queryRgx := regexp.QuoteMeta("INSERT INTO `books` (`created_at`,`updated_at`,`deleted_at`,`name`,`isbn`) VALUES (?,?,?,?,?)")
-	errDatabase := errors.New("error")
+	errDatabase := errors.New("error database")
 
 	tests := []struct {
-		name          string
-		input         input
-		output        output
-		configureMock func(confMock)
+		name           string
+		givenInput     input
+		expectedOutput output
+		configureMock  func(mockConfig)
 	}{
 		{
 			name: "success create book",
-			input: input{
+			givenInput: input{
 				book: &models.Book{
 					Name: "Book",
 					ISBN: "1234",
 				},
 			},
-			output: output{
+			expectedOutput: output{
 				err: nil,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.mock.ExpectBegin()
 				conf.mock.ExpectExec(queryRgx).
 					WithArgs(
 						AnyTime{}, AnyTime{}, nil,
-						conf.input.book.Name,
-						conf.input.book.ISBN,
+						conf.given.book.Name,
+						conf.given.book.ISBN,
 					).WillReturnResult(sqlmock.NewResult(1, 1))
 				conf.mock.ExpectCommit()
 			},
 		},
 		{
 			name: "error create book",
-			input: input{
+			givenInput: input{
 				book: &models.Book{
 					Name: "Book",
 					ISBN: "1234",
 				},
 			},
-			output: output{
+			expectedOutput: output{
 				err: errDatabase,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.mock.ExpectBegin()
 				conf.mock.ExpectExec(queryRgx).
 					WithArgs(
 						AnyTime{}, AnyTime{}, nil,
-						conf.input.book.Name,
-						conf.input.book.ISBN,
-					).WillReturnError(errDatabase)
+						conf.given.book.Name,
+						conf.given.book.ISBN,
+					).WillReturnError(conf.expected.err)
 				conf.mock.ExpectRollback()
 			},
 		},
@@ -192,20 +195,20 @@ func TestBookRepository_CreateBook(t *testing.T) {
 	defer closeDB(dbMock)
 
 	for _, tt := range tests {
-		tt.configureMock(confMock{
-			input:  tt.input,
-			output: tt.output,
-			mock:   mock,
+		tt.configureMock(mockConfig{
+			given:    tt.givenInput,
+			expected: tt.expectedOutput,
+			mock:     mock,
 		})
 
 		repo := bookRepository{
 			db: dbMock,
 		}
 
-		err := repo.CreateBook(tt.input.book)
-		if expectedErr := tt.output.err; !errors.Is(err, tt.output.err) {
+		err := repo.CreateBook(tt.givenInput.book)
+		if expectedError := tt.expectedOutput.err; !errors.Is(err, expectedError) {
 			t.Errorf("CreateBook() got error: %v\nexpected: %v",
-				err, expectedErr)
+				err, expectedError)
 		}
 	}
 }
@@ -217,24 +220,24 @@ func TestBookRepository_UpdateBook(t *testing.T) {
 	type output struct {
 		err error
 	}
-	type confMock struct {
-		input  input
-		output output
-		mock   sqlmock.Sqlmock
+	type mockConfig struct {
+		given    input
+		expected output
+		mock     sqlmock.Sqlmock
 	}
 
 	queryRgx := regexp.QuoteMeta("UPDATE `books` SET `updated_at`=?,`name`=?,`isbn`=? WHERE `id` = ?")
 	errDatabase := errors.New("error")
 
 	tests := []struct {
-		name          string
-		input         input
-		output        output
-		configureMock func(confMock)
+		name           string
+		givenInput     input
+		expectedOutput output
+		configureMock  func(mockConfig)
 	}{
 		{
 			name: "success update book",
-			input: input{
+			givenInput: input{
 				book: &models.Book{
 					Model: gorm.Model{
 						ID: 1,
@@ -243,24 +246,24 @@ func TestBookRepository_UpdateBook(t *testing.T) {
 					ISBN: "1234",
 				},
 			},
-			output: output{
+			expectedOutput: output{
 				err: nil,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.mock.ExpectBegin()
 				conf.mock.ExpectExec(queryRgx).
 					WithArgs(
 						AnyTime{},
-						conf.input.book.Name,
-						conf.input.book.ISBN,
-						conf.input.book.ID,
+						conf.given.book.Name,
+						conf.given.book.ISBN,
+						conf.given.book.ID,
 					).WillReturnResult(sqlmock.NewResult(1, 1))
 				conf.mock.ExpectCommit()
 			},
 		},
 		{
 			name: "error update book",
-			input: input{
+			givenInput: input{
 				book: &models.Book{
 					Model: gorm.Model{
 						ID: 1,
@@ -269,18 +272,18 @@ func TestBookRepository_UpdateBook(t *testing.T) {
 					ISBN: "1234",
 				},
 			},
-			output: output{
+			expectedOutput: output{
 				err: errDatabase,
 			},
-			configureMock: func(conf confMock) {
+			configureMock: func(conf mockConfig) {
 				conf.mock.ExpectBegin()
 				conf.mock.ExpectExec(queryRgx).
 					WithArgs(
 						AnyTime{},
-						conf.input.book.Name,
-						conf.input.book.ISBN,
-						conf.input.book.ID,
-					).WillReturnError(errDatabase)
+						conf.given.book.Name,
+						conf.given.book.ISBN,
+						conf.given.book.ID,
+					).WillReturnError(conf.expected.err)
 				conf.mock.ExpectRollback()
 			},
 		},
@@ -293,20 +296,20 @@ func TestBookRepository_UpdateBook(t *testing.T) {
 	defer closeDB(dbMock)
 
 	for _, tt := range tests {
-		tt.configureMock(confMock{
-			input:  tt.input,
-			output: tt.output,
-			mock:   mock,
+		tt.configureMock(mockConfig{
+			given:    tt.givenInput,
+			expected: tt.expectedOutput,
+			mock:     mock,
 		})
 
 		repo := bookRepository{
 			db: dbMock,
 		}
 
-		err := repo.UpdateBook(tt.input.book)
-		if expectedErr := tt.output.err; !errors.Is(err, tt.output.err) {
+		err := repo.UpdateBook(tt.givenInput.book)
+		if expectedError := tt.expectedOutput.err; !errors.Is(err, expectedError) {
 			t.Errorf("UpdateBook() got error: %v\nexpected: %v",
-				err, expectedErr)
+				err, expectedError)
 		}
 	}
 }
