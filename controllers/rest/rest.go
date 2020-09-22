@@ -10,6 +10,7 @@ import (
 	"os/signal"
 	"time"
 
+	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
 	httpSwagger "github.com/swaggo/http-swagger"
 
@@ -46,6 +47,7 @@ func serve(r http.Handler) {
 	flag.Parse()
 
 	cfg := configs.GetConfig().Server
+	r = handlers.LoggingHandler(os.Stdout, r)
 	srv := &http.Server{
 		Addr:         cfg.Address,
 		WriteTimeout: time.Duration(cfg.WriteTimeout) * time.Second,

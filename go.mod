@@ -10,6 +10,7 @@ require (
 	github.com/go-openapi/spec v0.19.9 // indirect
 	github.com/go-openapi/swag v0.19.9 // indirect
 	github.com/golang/mock v1.4.4
+	github.com/gorilla/handlers v1.5.1
 	github.com/gorilla/mux v1.8.0
 	github.com/magiconair/properties v1.8.2 // indirect
 	github.com/mailru/easyjson v0.7.6 // indirect
