@@ -1,6 +1,7 @@
 package elasticsearch
 
 import (
+	"context"
 	"encoding/json"
 	"strconv"
 	"strings"
@@ -12,8 +13,8 @@ import (
 
 // BookRepository interface
 type BookRepository interface {
-	IndexBook(*models.Book) error
-	SearchBook(string) (models.Books, error)
+	IndexBook(context.Context, *models.Book) error
+	SearchBook(context.Context, string) (models.Books, error)
 }
 
 type bookRepository struct {
@@ -29,7 +30,7 @@ func NewBookRepository(es *elasticsearch.Client) BookRepository {
 	}
 }
 
-func (repo *bookRepository) IndexBook(book *models.Book) error {
+func (repo *bookRepository) IndexBook(ctx context.Context, book *models.Book) error {
 	bookBytes, err := json.Marshal(book)
 	if err != nil {
 		return err
@@ -38,6 +39,7 @@ func (repo *bookRepository) IndexBook(book *models.Book) error {
 	res, err := repo.es.Index(
 		repo.index,
 		strings.NewReader(string(bookBytes)),
+		es.Index.WithContext(ctx),
 		es.Index.WithDocumentID(strconv.Itoa(int(book.ID))),
 		es.Index.WithPretty(),
 	)
@@ -49,8 +51,9 @@ func (repo *bookRepository) IndexBook(book *models.Book) error {
 	return nil
 }
 
-func (repo *bookRepository) SearchBook(keyword string) (models.Books, error) {
+func (repo *bookRepository) SearchBook(ctx context.Context, keyword string) (models.Books, error) {
 	res, err := repo.es.Search(
+		es.Search.WithContext(ctx),
 		es.Search.WithIndex(repo.index),
 		es.Search.WithQuery(keyword),
 		es.Search.WithPretty(),

@@ -26,9 +26,9 @@ func NewBookController(route *mux.Router, useCase *usecases.UseCase) *BookContro
 	v1Route := route.PathPrefix("/v1").Subrouter()
 
 	v1BookRoute := v1Route.PathPrefix("/book").Subrouter()
-	v1BookRoute.HandleFunc("", ctrl.CreateBook).Methods("POST")
-	v1BookRoute.HandleFunc("", ctrl.GetBooks).Methods("GET")
-	v1BookRoute.HandleFunc("", ctrl.UpdateBook).Methods("PUT")
+	v1BookRoute.HandleFunc("", ctrl.CreateBook).Methods(http.MethodPost)
+	v1BookRoute.HandleFunc("", ctrl.GetBooks).Methods(http.MethodGet)
+	v1BookRoute.HandleFunc("", ctrl.UpdateBook).Methods(http.MethodPut)
 
 	return ctrl
 }
@@ -44,21 +44,21 @@ func NewBookController(route *mux.Router, useCase *usecases.UseCase) *BookContro
 // @Failure 400 {object} responses.ErrorResponse "Bad Request"
 // @Failure 500 {object} responses.ErrorResponse "Internal Server Error"
 // @Router /v1/book [post]
-func (ctrl *BookController) CreateBook(res http.ResponseWriter, req *http.Request) {
+func (ctrl *BookController) CreateBook(w http.ResponseWriter, r *http.Request) {
 	var book models.Book
-	decoder := json.NewDecoder(req.Body)
+	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&book); err != nil {
-		respondWithError(res, http.StatusBadRequest, "Invalid request payload")
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
-	if err := ctrl.bookService.CreateBook(&book); err != nil {
-		respondWithError(res, http.StatusInternalServerError,
+	if err := ctrl.bookService.CreateBook(r.Context(), &book); err != nil {
+		respondWithError(w, http.StatusInternalServerError,
 			fmt.Sprintf("Failed create book: %s", err.Error()))
 		return
 	}
 
-	respondWithJSON(res, http.StatusCreated, book)
+	respondWithJSON(w, http.StatusCreated, book)
 }
 
 // GetBooks handle get all books request
@@ -71,22 +71,22 @@ func (ctrl *BookController) CreateBook(res http.ResponseWriter, req *http.Reques
 // @Success 200 {object} models.Books "OK"
 // @Failure 500 {object} responses.ErrorResponse "Internal Server Error"
 // @Router /v1/book [get]
-func (ctrl *BookController) GetBooks(res http.ResponseWriter, req *http.Request) {
+func (ctrl *BookController) GetBooks(w http.ResponseWriter, r *http.Request) {
 	var books models.Books
 	var err error
-	if keyword := req.URL.Query().Get("search"); keyword != "" {
-		books, err = ctrl.bookService.SearchBooks(keyword)
+	if keyword := r.URL.Query().Get("search"); keyword != "" {
+		books, err = ctrl.bookService.SearchBooks(r.Context(), keyword)
 	} else {
-		books, err = ctrl.bookService.GetBooks()
+		books, err = ctrl.bookService.GetBooks(r.Context())
 	}
 
 	if err != nil {
-		respondWithError(res, http.StatusInternalServerError,
+		respondWithError(w, http.StatusInternalServerError,
 			fmt.Sprintf("Failed get books: %s", err.Error()))
 		return
 	}
 
-	respondWithJSON(res, http.StatusOK, books)
+	respondWithJSON(w, http.StatusOK, books)
 }
 
 // UpdateBook handle update book request
@@ -100,19 +100,19 @@ func (ctrl *BookController) GetBooks(res http.ResponseWriter, req *http.Request)
 // @Failure 400 {object} responses.ErrorResponse "Bad Request"
 // @Failure 500 {object} responses.ErrorResponse "Internal Server Error"
 // @Router /v1/book [put]
-func (ctrl *BookController) UpdateBook(res http.ResponseWriter, req *http.Request) {
+func (ctrl *BookController) UpdateBook(w http.ResponseWriter, r *http.Request) {
 	var book models.Book
-	decoder := json.NewDecoder(req.Body)
+	decoder := json.NewDecoder(r.Body)
 	if err := decoder.Decode(&book); err != nil {
-		respondWithError(res, http.StatusBadRequest, "Invalid request payload")
+		respondWithError(w, http.StatusBadRequest, "Invalid request payload")
 		return
 	}
 
-	if err := ctrl.bookService.UpdateBook(&book); err != nil {
-		respondWithError(res, http.StatusInternalServerError,
+	if err := ctrl.bookService.UpdateBook(r.Context(), &book); err != nil {
+		respondWithError(w, http.StatusInternalServerError,
 			fmt.Sprintf("Failed update book: %s", err.Error()))
 		return
 	}
 
-	respondWithJSON(res, http.StatusOK, book)
+	respondWithJSON(w, http.StatusOK, book)
 }

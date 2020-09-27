@@ -6,6 +6,7 @@ package mocks
 
 import (
 	models "book-management-system/entities/models"
+	context "context"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -34,59 +35,59 @@ func (m *MockBookService) EXPECT() *MockBookServiceMockRecorder {
 }
 
 // GetBooks mocks base method
-func (m *MockBookService) GetBooks() (models.Books, error) {
+func (m *MockBookService) GetBooks(arg0 context.Context) (models.Books, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "GetBooks")
+	ret := m.ctrl.Call(m, "GetBooks", arg0)
 	ret0, _ := ret[0].(models.Books)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // GetBooks indicates an expected call of GetBooks
-func (mr *MockBookServiceMockRecorder) GetBooks() *gomock.Call {
+func (mr *MockBookServiceMockRecorder) GetBooks(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBooks", reflect.TypeOf((*MockBookService)(nil).GetBooks))
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetBooks", reflect.TypeOf((*MockBookService)(nil).GetBooks), arg0)
 }
 
 // CreateBook mocks base method
-func (m *MockBookService) CreateBook(arg0 *models.Book) error {
+func (m *MockBookService) CreateBook(arg0 context.Context, arg1 *models.Book) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "CreateBook", arg0)
+	ret := m.ctrl.Call(m, "CreateBook", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // CreateBook indicates an expected call of CreateBook
-func (mr *MockBookServiceMockRecorder) CreateBook(arg0 interface{}) *gomock.Call {
+func (mr *MockBookServiceMockRecorder) CreateBook(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBook", reflect.TypeOf((*MockBookService)(nil).CreateBook), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "CreateBook", reflect.TypeOf((*MockBookService)(nil).CreateBook), arg0, arg1)
 }
 
 // UpdateBook mocks base method
-func (m *MockBookService) UpdateBook(arg0 *models.Book) error {
+func (m *MockBookService) UpdateBook(arg0 context.Context, arg1 *models.Book) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "UpdateBook", arg0)
+	ret := m.ctrl.Call(m, "UpdateBook", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // UpdateBook indicates an expected call of UpdateBook
-func (mr *MockBookServiceMockRecorder) UpdateBook(arg0 interface{}) *gomock.Call {
+func (mr *MockBookServiceMockRecorder) UpdateBook(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBook", reflect.TypeOf((*MockBookService)(nil).UpdateBook), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "UpdateBook", reflect.TypeOf((*MockBookService)(nil).UpdateBook), arg0, arg1)
 }
 
 // SearchBooks mocks base method
-func (m *MockBookService) SearchBooks(arg0 string) (models.Books, error) {
+func (m *MockBookService) SearchBooks(arg0 context.Context, arg1 string) (models.Books, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchBooks", arg0)
+	ret := m.ctrl.Call(m, "SearchBooks", arg0, arg1)
 	ret0, _ := ret[0].(models.Books)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SearchBooks indicates an expected call of SearchBooks
-func (mr *MockBookServiceMockRecorder) SearchBooks(arg0 interface{}) *gomock.Call {
+func (mr *MockBookServiceMockRecorder) SearchBooks(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchBooks", reflect.TypeOf((*MockBookService)(nil).SearchBooks), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchBooks", reflect.TypeOf((*MockBookService)(nil).SearchBooks), arg0, arg1)
 }

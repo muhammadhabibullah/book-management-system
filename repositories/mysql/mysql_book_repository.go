@@ -1,6 +1,8 @@
 package mysql
 
 import (
+	"context"
+
 	"gorm.io/gorm"
 
 	"book-management-system/entities/models"
@@ -8,9 +10,9 @@ import (
 
 // BookRepository handle sql query to book table
 type BookRepository interface {
-	GetAll() (models.Books, error)
-	CreateBook(*models.Book) error
-	UpdateBook(*models.Book) error
+	GetAll(context.Context) (models.Books, error)
+	CreateBook(context.Context, *models.Book) error
+	UpdateBook(context.Context, *models.Book) error
 }
 
 type bookRepository struct {
@@ -24,19 +26,22 @@ func NewBookRepository(db *gorm.DB) BookRepository {
 	}
 }
 
-func (repo *bookRepository) GetAll() (models.Books, error) {
+func (repo *bookRepository) GetAll(ctx context.Context) (models.Books, error) {
 	var books models.Books
 
-	query := repo.db.Find(&books)
+	query := repo.db.WithContext(ctx).
+		Find(&books)
 	return books, query.Error
 }
 
-func (repo *bookRepository) CreateBook(book *models.Book) error {
-	query := repo.db.Create(book)
+func (repo *bookRepository) CreateBook(ctx context.Context, book *models.Book) error {
+	query := repo.db.WithContext(ctx).
+		Create(book)
 	return query.Error
 }
 
-func (repo *bookRepository) UpdateBook(book *models.Book) error {
-	query := repo.db.Updates(book)
+func (repo *bookRepository) UpdateBook(ctx context.Context, book *models.Book) error {
+	query := repo.db.WithContext(ctx).
+		Updates(book)
 	return query.Error
 }
