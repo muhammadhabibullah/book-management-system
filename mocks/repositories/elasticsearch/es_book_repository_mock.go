@@ -6,6 +6,7 @@ package mocks
 
 import (
 	models "book-management-system/entities/models"
+	context "context"
 	gomock "github.com/golang/mock/gomock"
 	reflect "reflect"
 )
@@ -34,30 +35,30 @@ func (m *MockBookRepository) EXPECT() *MockBookRepositoryMockRecorder {
 }
 
 // IndexBook mocks base method
-func (m *MockBookRepository) IndexBook(arg0 *models.Book) error {
+func (m *MockBookRepository) IndexBook(arg0 context.Context, arg1 *models.Book) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "IndexBook", arg0)
+	ret := m.ctrl.Call(m, "IndexBook", arg0, arg1)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // IndexBook indicates an expected call of IndexBook
-func (mr *MockBookRepositoryMockRecorder) IndexBook(arg0 interface{}) *gomock.Call {
+func (mr *MockBookRepositoryMockRecorder) IndexBook(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IndexBook", reflect.TypeOf((*MockBookRepository)(nil).IndexBook), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "IndexBook", reflect.TypeOf((*MockBookRepository)(nil).IndexBook), arg0, arg1)
 }
 
 // SearchBook mocks base method
-func (m *MockBookRepository) SearchBook(arg0 string) (models.Books, error) {
+func (m *MockBookRepository) SearchBook(arg0 context.Context, arg1 string) (models.Books, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "SearchBook", arg0)
+	ret := m.ctrl.Call(m, "SearchBook", arg0, arg1)
 	ret0, _ := ret[0].(models.Books)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // SearchBook indicates an expected call of SearchBook
-func (mr *MockBookRepositoryMockRecorder) SearchBook(arg0 interface{}) *gomock.Call {
+func (mr *MockBookRepositoryMockRecorder) SearchBook(arg0, arg1 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchBook", reflect.TypeOf((*MockBookRepository)(nil).SearchBook), arg0)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "SearchBook", reflect.TypeOf((*MockBookRepository)(nil).SearchBook), arg0, arg1)
 }

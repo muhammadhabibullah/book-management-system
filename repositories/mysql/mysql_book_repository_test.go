@@ -1,6 +1,7 @@
 package mysql
 
 import (
+	"context"
 	"errors"
 	"reflect"
 	"regexp"
@@ -27,6 +28,9 @@ func TestNewBookRepository(t *testing.T) {
 }
 
 func TestBookRepository_GetAll(t *testing.T) {
+	type input struct {
+		ctx context.Context
+	}
 	type output struct {
 		books models.Books
 		err   error
@@ -41,11 +45,15 @@ func TestBookRepository_GetAll(t *testing.T) {
 
 	tests := []struct {
 		name           string
+		givenInput     input
 		expectedOutput output
 		configureMock  func(mockConfig)
 	}{
 		{
 			name: "success get all books",
+			givenInput: input{
+				ctx: context.TODO(),
+			},
 			expectedOutput: output{
 				books: models.Books{
 					{
@@ -70,6 +78,9 @@ func TestBookRepository_GetAll(t *testing.T) {
 		},
 		{
 			name: "no books found",
+			givenInput: input{
+				ctx: context.TODO(),
+			},
 			expectedOutput: output{
 				books: models.Books{},
 				err:   nil,
@@ -108,7 +119,7 @@ func TestBookRepository_GetAll(t *testing.T) {
 			db: dbMock,
 		}
 
-		books, err := repo.GetAll()
+		books, err := repo.GetAll(tt.givenInput.ctx)
 		if expectedError := tt.expectedOutput.err; !errors.Is(err, expectedError) {
 			t.Errorf("GetAll() got error: %v\nexpected: %v",
 				err, expectedError)
@@ -122,6 +133,7 @@ func TestBookRepository_GetAll(t *testing.T) {
 
 func TestBookRepository_CreateBook(t *testing.T) {
 	type input struct {
+		ctx  context.Context
 		book *models.Book
 	}
 	type output struct {
@@ -145,6 +157,7 @@ func TestBookRepository_CreateBook(t *testing.T) {
 		{
 			name: "success create book",
 			givenInput: input{
+				ctx: context.TODO(),
 				book: &models.Book{
 					Name: "Book",
 					ISBN: "1234",
@@ -167,6 +180,7 @@ func TestBookRepository_CreateBook(t *testing.T) {
 		{
 			name: "error create book",
 			givenInput: input{
+				ctx: context.TODO(),
 				book: &models.Book{
 					Name: "Book",
 					ISBN: "1234",
@@ -205,7 +219,7 @@ func TestBookRepository_CreateBook(t *testing.T) {
 			db: dbMock,
 		}
 
-		err := repo.CreateBook(tt.givenInput.book)
+		err := repo.CreateBook(tt.givenInput.ctx, tt.givenInput.book)
 		if expectedError := tt.expectedOutput.err; !errors.Is(err, expectedError) {
 			t.Errorf("CreateBook() got error: %v\nexpected: %v",
 				err, expectedError)
@@ -215,6 +229,7 @@ func TestBookRepository_CreateBook(t *testing.T) {
 
 func TestBookRepository_UpdateBook(t *testing.T) {
 	type input struct {
+		ctx  context.Context
 		book *models.Book
 	}
 	type output struct {
@@ -238,6 +253,7 @@ func TestBookRepository_UpdateBook(t *testing.T) {
 		{
 			name: "success update book",
 			givenInput: input{
+				ctx: context.TODO(),
 				book: &models.Book{
 					Model: gorm.Model{
 						ID: 1,
@@ -264,6 +280,7 @@ func TestBookRepository_UpdateBook(t *testing.T) {
 		{
 			name: "error update book",
 			givenInput: input{
+				ctx: context.TODO(),
 				book: &models.Book{
 					Model: gorm.Model{
 						ID: 1,
@@ -306,7 +323,7 @@ func TestBookRepository_UpdateBook(t *testing.T) {
 			db: dbMock,
 		}
 
-		err := repo.UpdateBook(tt.givenInput.book)
+		err := repo.UpdateBook(tt.givenInput.ctx, tt.givenInput.book)
 		if expectedError := tt.expectedOutput.err; !errors.Is(err, expectedError) {
 			t.Errorf("UpdateBook() got error: %v\nexpected: %v",
 				err, expectedError)

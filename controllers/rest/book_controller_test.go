@@ -2,6 +2,7 @@ package rest
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -45,6 +46,7 @@ func TestNewBookController(t *testing.T) {
 func TestBookController_CreateBook(t *testing.T) {
 	type input struct {
 		valid              bool
+		ctx                context.Context
 		requestBody        *models.Book
 		invalidRequestBody models.Books
 	}
@@ -66,6 +68,7 @@ func TestBookController_CreateBook(t *testing.T) {
 			name: "failed: invalid request body",
 			givenInput: input{
 				valid: false,
+				ctx:   context.TODO(),
 				invalidRequestBody: models.Books{
 					{
 						Name: "C++",
@@ -84,6 +87,7 @@ func TestBookController_CreateBook(t *testing.T) {
 			name: "failed: service error",
 			givenInput: input{
 				valid: true,
+				ctx:   context.TODO(),
 				requestBody: &models.Book{
 					Name: "C++",
 					ISBN: "1234",
@@ -96,7 +100,7 @@ func TestBookController_CreateBook(t *testing.T) {
 			},
 			configureMock: func(conf mockConfig) {
 				conf.mock.EXPECT().
-					CreateBook(conf.given.requestBody).
+					CreateBook(conf.given.ctx, conf.given.requestBody).
 					Return(errors.New("service error"))
 			},
 		},
@@ -104,6 +108,7 @@ func TestBookController_CreateBook(t *testing.T) {
 			name: "success: create book",
 			givenInput: input{
 				valid: true,
+				ctx:   context.TODO(),
 				requestBody: &models.Book{
 					Name: "C++",
 					ISBN: "1234",
@@ -117,7 +122,7 @@ func TestBookController_CreateBook(t *testing.T) {
 			},
 			configureMock: func(conf mockConfig) {
 				conf.mock.EXPECT().
-					CreateBook(conf.given.requestBody).
+					CreateBook(conf.given.ctx, conf.given.requestBody).
 					Return(nil)
 			},
 		},
@@ -166,6 +171,7 @@ func TestBookController_CreateBook(t *testing.T) {
 
 func TestBookController_GetBook(t *testing.T) {
 	type input struct {
+		ctx            context.Context
 		httpRequestURL string
 		query          string
 	}
@@ -187,6 +193,7 @@ func TestBookController_GetBook(t *testing.T) {
 		{
 			name: "failed: service error",
 			givenInput: input{
+				ctx:            context.TODO(),
 				httpRequestURL: "/v1/book",
 			},
 			expectedOutput: output{
@@ -196,13 +203,14 @@ func TestBookController_GetBook(t *testing.T) {
 			},
 			configureMock: func(conf mockConfig) {
 				conf.mock.EXPECT().
-					GetBooks().
+					GetBooks(conf.given.ctx).
 					Return(models.Books{}, errors.New("service error"))
 			},
 		},
 		{
 			name: "success: get books",
 			givenInput: input{
+				ctx:            context.TODO(),
 				httpRequestURL: "/v1/book",
 			},
 			expectedOutput: output{
@@ -215,13 +223,14 @@ func TestBookController_GetBook(t *testing.T) {
 			},
 			configureMock: func(conf mockConfig) {
 				conf.mock.EXPECT().
-					GetBooks().
+					GetBooks(conf.given.ctx).
 					Return(conf.expected.responseBody, nil)
 			},
 		},
 		{
 			name: "success: search books",
 			givenInput: input{
+				ctx:            context.TODO(),
 				httpRequestURL: "/v1/book?search=1234",
 				query:          "1234",
 			},
@@ -235,7 +244,7 @@ func TestBookController_GetBook(t *testing.T) {
 			},
 			configureMock: func(conf mockConfig) {
 				conf.mock.EXPECT().
-					SearchBooks(conf.given.query).
+					SearchBooks(conf.given.ctx, conf.given.query).
 					Return(conf.expected.responseBody, nil)
 			},
 		},
@@ -279,6 +288,7 @@ func TestBookController_GetBook(t *testing.T) {
 func TestBookController_UpdateBook(t *testing.T) {
 	type input struct {
 		valid              bool
+		ctx                context.Context
 		requestBody        *models.Book
 		invalidRequestBody models.Books
 	}
@@ -286,7 +296,7 @@ func TestBookController_UpdateBook(t *testing.T) {
 		responseBody interface{}
 	}
 	type confMock struct {
-		input input
+		given input
 		mock  *mocks.MockBookService
 	}
 
@@ -300,6 +310,7 @@ func TestBookController_UpdateBook(t *testing.T) {
 			name: "failed: invalid request body",
 			input: input{
 				valid: false,
+				ctx:   context.TODO(),
 				invalidRequestBody: models.Books{
 					{
 						Name: "C++",
@@ -318,6 +329,7 @@ func TestBookController_UpdateBook(t *testing.T) {
 			name: "failed: service error",
 			input: input{
 				valid: true,
+				ctx:   context.TODO(),
 				requestBody: &models.Book{
 					Name: "C++",
 					ISBN: "1234",
@@ -330,7 +342,7 @@ func TestBookController_UpdateBook(t *testing.T) {
 			},
 			configureMock: func(conf confMock) {
 				conf.mock.EXPECT().
-					UpdateBook(conf.input.requestBody).
+					UpdateBook(conf.given.ctx, conf.given.requestBody).
 					Return(errors.New("service error"))
 			},
 		},
@@ -338,6 +350,7 @@ func TestBookController_UpdateBook(t *testing.T) {
 			name: "success: update book",
 			input: input{
 				valid: true,
+				ctx:   context.TODO(),
 				requestBody: &models.Book{
 					Name: "C++",
 					ISBN: "1234",
@@ -351,7 +364,7 @@ func TestBookController_UpdateBook(t *testing.T) {
 			},
 			configureMock: func(conf confMock) {
 				conf.mock.EXPECT().
-					UpdateBook(conf.input.requestBody).
+					UpdateBook(conf.given.ctx, conf.given.requestBody).
 					Return(nil)
 			},
 		},
@@ -378,7 +391,7 @@ func TestBookController_UpdateBook(t *testing.T) {
 
 			bookServiceMock := mocks.NewMockBookService(ctrl)
 			tt.configureMock(confMock{
-				input: tt.input,
+				given: tt.input,
 				mock:  bookServiceMock,
 			})
 

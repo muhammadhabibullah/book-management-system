@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"log"
 
 	"book-management-system/entities/models"
@@ -11,10 +12,10 @@ import (
 
 // BookService handle business logic related to book
 type BookService interface {
-	GetBooks() (models.Books, error)
-	CreateBook(*models.Book) error
-	UpdateBook(*models.Book) error
-	SearchBooks(string) (models.Books, error)
+	GetBooks(context.Context) (models.Books, error)
+	CreateBook(context.Context, *models.Book) error
+	UpdateBook(context.Context, *models.Book) error
+	SearchBooks(context.Context, string) (models.Books, error)
 }
 
 type bookService struct {
@@ -30,18 +31,24 @@ func NewBookService(repo *repositories.Repository) BookService {
 	}
 }
 
-func (svc *bookService) GetBooks() (models.Books, error) {
-	return svc.MySQLBookRepository.GetAll()
+func (svc *bookService) GetBooks(ctx context.Context) (models.Books, error) {
+	ctx, cancel := setContextTimeout(ctx)
+	defer cancel()
+
+	return svc.MySQLBookRepository.GetAll(ctx)
 }
 
-func (svc *bookService) CreateBook(book *models.Book) error {
-	err := svc.MySQLBookRepository.CreateBook(book)
+func (svc *bookService) CreateBook(ctx context.Context, book *models.Book) error {
+	ctx, cancel := setContextTimeout(ctx)
+	defer cancel()
+
+	err := svc.MySQLBookRepository.CreateBook(ctx, book)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		err := svc.ESBookRepository.IndexBook(book)
+		err := svc.ESBookRepository.IndexBook(context.Background(), book)
 		if err != nil {
 			log.Printf("error create book in elasticsearch %s", err)
 		}
@@ -49,14 +56,17 @@ func (svc *bookService) CreateBook(book *models.Book) error {
 	return nil
 }
 
-func (svc *bookService) UpdateBook(book *models.Book) error {
-	err := svc.MySQLBookRepository.UpdateBook(book)
+func (svc *bookService) UpdateBook(ctx context.Context, book *models.Book) error {
+	ctx, cancel := setContextTimeout(ctx)
+	defer cancel()
+
+	err := svc.MySQLBookRepository.UpdateBook(ctx, book)
 	if err != nil {
 		return err
 	}
 
 	go func() {
-		err := svc.ESBookRepository.IndexBook(book)
+		err := svc.ESBookRepository.IndexBook(context.Background(), book)
 		if err != nil {
 			log.Printf("error update book in elasticsearch %s", err)
 		}
@@ -64,6 +74,9 @@ func (svc *bookService) UpdateBook(book *models.Book) error {
 	return nil
 }
 
-func (svc *bookService) SearchBooks(keyword string) (models.Books, error) {
-	return svc.ESBookRepository.SearchBook(keyword)
+func (svc *bookService) SearchBooks(ctx context.Context, keyword string) (models.Books, error) {
+	ctx, cancel := setContextTimeout(ctx)
+	defer cancel()
+
+	return svc.ESBookRepository.SearchBook(ctx, keyword)
 }
