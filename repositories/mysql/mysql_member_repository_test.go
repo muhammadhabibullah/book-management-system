@@ -250,7 +250,7 @@ func TestMemberRepositoryUpdateMember(t *testing.T) {
 					Model: gorm.Model{
 						ID: 1,
 					},
-					Name: "",
+					Name: "Updated Member",
 				},
 			},
 			expectedOutput: output{
@@ -275,7 +275,7 @@ func TestMemberRepositoryUpdateMember(t *testing.T) {
 					Model: gorm.Model{
 						ID: 1,
 					},
-					Name: "",
+					Name: "Updated Member",
 				},
 			},
 			expectedOutput: output{
