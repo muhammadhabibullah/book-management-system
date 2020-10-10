@@ -4,4 +4,4 @@ import (
 	"errors"
 )
 
-var serviceError = errors.New("service error")
+var errService = errors.New("service error")

@@ -22,4 +22,4 @@ func TestInitServices(t *testing.T) {
 	}
 }
 
-var repositoryErr = errors.New("repository error")
+var errRepository = errors.New("repository error")

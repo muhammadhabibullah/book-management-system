@@ -99,7 +99,7 @@ func TestBookServiceCreateBook(t *testing.T) {
 				},
 			},
 			expectedOutput: output{
-				err: repositoryErr,
+				err: errRepository,
 			},
 			configureMock: func(conf mockConfig) {
 				conf.mySQLBookRepoMock.EXPECT().
@@ -191,7 +191,7 @@ func TestBookServiceGetBook(t *testing.T) {
 			},
 			expectedOutput: output{
 				books: models.Books{},
-				err:   repositoryErr,
+				err:   errRepository,
 			},
 			configureMock: func(conf mockConfig) {
 				conf.mySQLBookRepoMock.EXPECT().
@@ -293,7 +293,7 @@ func TestBookServiceUpdateBook(t *testing.T) {
 				},
 			},
 			expectedOutput: output{
-				err: repositoryErr,
+				err: errRepository,
 			},
 			configureMock: func(conf mockConfig) {
 				conf.mySQLBookRepoMock.EXPECT().
@@ -388,7 +388,7 @@ func TestBookServiceSearchBook(t *testing.T) {
 			},
 			expectedOutput: output{
 				books: models.Books{},
-				err:   repositoryErr,
+				err:   errRepository,
 			},
 			configureMock: func(conf mockConfig) {
 				conf.esBookRepoMock.EXPECT().

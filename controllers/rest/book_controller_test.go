@@ -100,13 +100,13 @@ func TestBookControllerCreateBook(t *testing.T) {
 			},
 			expectedOutput: output{
 				responseBody: responses.ErrorResponse{
-					"error": fmt.Sprintf("Failed create book: %s", serviceError.Error()),
+					"error": fmt.Sprintf("Failed create book: %s", errService.Error()),
 				},
 			},
 			configureMock: func(conf mockConfig) {
 				conf.mock.EXPECT().
 					CreateBook(conf.given.ctx, conf.given.requestBody).
-					Return(serviceError)
+					Return(errService)
 			},
 		},
 		{
@@ -203,13 +203,13 @@ func TestBookControllerGetBook(t *testing.T) {
 			},
 			expectedOutput: output{
 				responseBody: responses.ErrorResponse{
-					"error": fmt.Sprintf("Failed get books: %s", serviceError.Error()),
+					"error": fmt.Sprintf("Failed get books: %s", errService.Error()),
 				},
 			},
 			configureMock: func(conf mockConfig) {
 				conf.mock.EXPECT().
 					GetBooks(conf.given.ctx).
-					Return(models.Books{}, serviceError)
+					Return(models.Books{}, errService)
 			},
 		},
 		{
@@ -344,13 +344,13 @@ func TestBookControllerUpdateBook(t *testing.T) {
 			},
 			expectedOutput: output{
 				responseBody: responses.ErrorResponse{
-					"error": fmt.Sprintf("Failed update book: %s", serviceError.Error()),
+					"error": fmt.Sprintf("Failed update book: %s", errService.Error()),
 				},
 			},
 			configureMock: func(conf confMock) {
 				conf.mock.EXPECT().
 					UpdateBook(conf.given.ctx, conf.given.requestBody).
-					Return(serviceError)
+					Return(errService)
 			},
 		},
 		{
