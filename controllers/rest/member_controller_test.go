@@ -74,7 +74,7 @@ func TestMemberControllerCreateMember(t *testing.T) {
 				ctx:   context.TODO(),
 				invalidRequestBody: models.Members{
 					{
-						Name: "John Lennon",
+						Name: "",
 					},
 				},
 			},
@@ -93,7 +93,7 @@ func TestMemberControllerCreateMember(t *testing.T) {
 				valid: true,
 				ctx:   context.TODO(),
 				requestBody: &models.Member{
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			expectedOutput: output{
@@ -113,12 +113,12 @@ func TestMemberControllerCreateMember(t *testing.T) {
 				valid: true,
 				ctx:   context.TODO(),
 				requestBody: &models.Member{
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			expectedOutput: output{
 				responseBody: models.Member{
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			configureMock: func(conf mockConfig) {
@@ -216,7 +216,7 @@ func TestMemberControllerGetMember(t *testing.T) {
 			expectedOutput: output{
 				responseBody: models.Members{
 					{
-						Name: "John Lennon",
+						Name: "",
 					},
 				},
 			},
@@ -291,7 +291,7 @@ func TestMemberControllerUpdateMember(t *testing.T) {
 				ctx:   context.TODO(),
 				invalidRequestBody: models.Members{
 					{
-						Name: "John Lennon",
+						Name: "",
 					},
 				},
 			},
@@ -310,7 +310,7 @@ func TestMemberControllerUpdateMember(t *testing.T) {
 				valid: true,
 				ctx:   context.TODO(),
 				requestBody: &models.Member{
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			expectedOutput: output{
@@ -330,12 +330,12 @@ func TestMemberControllerUpdateMember(t *testing.T) {
 				valid: true,
 				ctx:   context.TODO(),
 				requestBody: &models.Member{
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			expectedOutput: output{
 				responseBody: models.Member{
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			configureMock: func(conf confMock) {

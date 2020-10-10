@@ -59,7 +59,7 @@ func TestMemberServiceCreateMember(t *testing.T) {
 			givenInput: input{
 				ctx: context.TODO(),
 				member: &models.Member{
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			expectedOutput: output{
@@ -76,7 +76,7 @@ func TestMemberServiceCreateMember(t *testing.T) {
 			givenInput: input{
 				ctx: context.TODO(),
 				member: &models.Member{
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			expectedOutput: output{
@@ -144,7 +144,7 @@ func TestMemberServiceGetMembers(t *testing.T) {
 			expectedOutput: output{
 				members: models.Members{
 					{
-						Name: "John Lennon",
+						Name: "",
 					},
 				},
 				err: nil,
@@ -233,7 +233,7 @@ func TestMemberServiceUpdateMember(t *testing.T) {
 			givenInput: input{
 				ctx: context.TODO(),
 				member: &models.Member{
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			expectedOutput: output{
@@ -250,7 +250,7 @@ func TestMemberServiceUpdateMember(t *testing.T) {
 			givenInput: input{
 				ctx: context.TODO(),
 				member: &models.Member{
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			expectedOutput: output{

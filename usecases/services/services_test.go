@@ -13,7 +13,8 @@ func TestInitServices(t *testing.T) {
 
 	got := Init(repo)
 	expected := &Services{
-		BookService: NewBookService(repo),
+		BookService:   NewBookService(repo),
+		MemberService: NewMemberService(repo),
 	}
 
 	if !reflect.DeepEqual(got, expected) {

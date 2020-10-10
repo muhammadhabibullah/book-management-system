@@ -59,7 +59,7 @@ func TestMemberRepositoryGetAll(t *testing.T) {
 						Model: gorm.Model{
 							ID: 1,
 						},
-						Name: "John Lennon",
+						Name: "",
 					},
 				},
 				err: nil,
@@ -156,7 +156,7 @@ func TestMemberRepositoryCreateMember(t *testing.T) {
 			givenInput: input{
 				ctx: context.TODO(),
 				member: &models.Member{
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			expectedOutput: output{
@@ -177,7 +177,7 @@ func TestMemberRepositoryCreateMember(t *testing.T) {
 			givenInput: input{
 				ctx: context.TODO(),
 				member: &models.Member{
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			expectedOutput: output{
@@ -250,7 +250,7 @@ func TestMemberRepositoryUpdateMember(t *testing.T) {
 					Model: gorm.Model{
 						ID: 1,
 					},
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			expectedOutput: output{
@@ -275,7 +275,7 @@ func TestMemberRepositoryUpdateMember(t *testing.T) {
 					Model: gorm.Model{
 						ID: 1,
 					},
-					Name: "John Lennon",
+					Name: "",
 				},
 			},
 			expectedOutput: output{
