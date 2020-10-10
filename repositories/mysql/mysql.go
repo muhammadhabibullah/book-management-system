@@ -35,6 +35,7 @@ func Init() *gorm.DB {
 			if err = mysqlDB.Set("gorm:table_options", "ENGINE=InnoDB").
 				AutoMigrate(
 					&models.Book{},
+					&models.Member{},
 				); err != nil {
 				log.Fatalf("failed to migrate new model to mysql database: %s", err)
 			}

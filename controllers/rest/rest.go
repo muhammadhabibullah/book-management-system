@@ -25,6 +25,7 @@ func Init(useCase *usecases.UseCase) {
 	r := mux.NewRouter()
 
 	NewBookController(r, useCase)
+	NewMemberController(r, useCase)
 
 	initDoc(r)
 	serve(r)

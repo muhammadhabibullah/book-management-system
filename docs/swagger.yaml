@@ -12,6 +12,16 @@ definitions:
     items:
       $ref: '#/definitions/models.Book'
     type: array
+  models.Member:
+    properties:
+      name:
+        example: John Lennon
+        type: string
+    type: object
+  models.Members:
+    items:
+      $ref: '#/definitions/models.Member'
+    type: array
   responses.ErrorResponse:
     additionalProperties:
       type: string
@@ -102,4 +112,81 @@ paths:
       summary: Update a book
       tags:
       - Book
+  /v1/member:
+    get:
+      consumes:
+      - application/json
+      description: Get all members
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.Members'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Get all members
+      tags:
+      - Member
+    post:
+      consumes:
+      - application/json
+      description: Create a new member
+      parameters:
+      - description: Request Body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Member'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/models.Member'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Create a new member
+      tags:
+      - Member
+    put:
+      consumes:
+      - application/json
+      description: Update a member
+      parameters:
+      - description: Request Body
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/models.Member'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Updated
+          schema:
+            $ref: '#/definitions/models.Member'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/responses.ErrorResponse'
+      summary: Update a member
+      tags:
+      - Member
 swagger: "2.0"

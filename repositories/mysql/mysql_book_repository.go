@@ -8,7 +8,7 @@ import (
 	"book-management-system/entities/models"
 )
 
-// BookRepository handle sql query to book table
+// BookRepository handle sql query to books table
 type BookRepository interface {
 	GetAll(context.Context) (models.Books, error)
 	CreateBook(context.Context, *models.Book) error
