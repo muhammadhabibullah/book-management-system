@@ -8,8 +8,9 @@ import (
 
 // Repository contains repositories
 type Repository struct {
-	MySQLBookRepository mysql.BookRepository
-	ESBookRepository    elasticsearch.BookRepository
+	MySQLBookRepository   mysql.BookRepository
+	ESBookRepository      elasticsearch.BookRepository
+	MySQLMemberRepository mysql.MemberRepository
 }
 
 // Init returns Repository
@@ -17,7 +18,8 @@ func Init() *Repository {
 	mysqlDB := mysql.Init()
 	es := elasticsearch.Init()
 	return &Repository{
-		MySQLBookRepository: mysql.NewBookRepository(mysqlDB),
-		ESBookRepository:    elasticsearch.NewBookRepository(es),
+		MySQLBookRepository:   mysql.NewBookRepository(mysqlDB),
+		ESBookRepository:      elasticsearch.NewBookRepository(es),
+		MySQLMemberRepository: mysql.NewMemberRepository(mysqlDB),
 	}
 }

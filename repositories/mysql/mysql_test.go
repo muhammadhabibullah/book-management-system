@@ -2,6 +2,7 @@ package mysql
 
 import (
 	"database/sql/driver"
+	"errors"
 	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
@@ -41,3 +42,5 @@ func closeDB(gormDBMock *gorm.DB) {
 	dbMock, _ := gormDBMock.DB()
 	dbMock.Close()
 }
+
+var errDatabase = errors.New("error")
