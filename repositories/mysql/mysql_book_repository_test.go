@@ -27,7 +27,7 @@ func TestNewBookRepository(t *testing.T) {
 	}
 }
 
-func TestBookRepository_GetAll(t *testing.T) {
+func TestBookRepositoryGetAll(t *testing.T) {
 	type input struct {
 		ctx context.Context
 	}
@@ -105,7 +105,7 @@ func TestBookRepository_GetAll(t *testing.T) {
 
 	dbMock, mock, err := setupTestSuite()
 	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		t.Fatal(err)
 	}
 	defer closeDB(dbMock)
 
@@ -131,7 +131,7 @@ func TestBookRepository_GetAll(t *testing.T) {
 	}
 }
 
-func TestBookRepository_CreateBook(t *testing.T) {
+func TestBookRepositoryCreateBook(t *testing.T) {
 	type input struct {
 		ctx  context.Context
 		book *models.Book
@@ -204,7 +204,7 @@ func TestBookRepository_CreateBook(t *testing.T) {
 
 	dbMock, mock, err := setupTestSuite()
 	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		t.Fatal(err)
 	}
 	defer closeDB(dbMock)
 
@@ -227,7 +227,7 @@ func TestBookRepository_CreateBook(t *testing.T) {
 	}
 }
 
-func TestBookRepository_UpdateBook(t *testing.T) {
+func TestBookRepositoryUpdateBook(t *testing.T) {
 	type input struct {
 		ctx  context.Context
 		book *models.Book
@@ -308,7 +308,7 @@ func TestBookRepository_UpdateBook(t *testing.T) {
 
 	dbMock, mock, err := setupTestSuite()
 	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		t.Fatal(err)
 	}
 	defer closeDB(dbMock)
 

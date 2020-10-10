@@ -1,6 +1,7 @@
 package services
 
 import (
+	"errors"
 	"reflect"
 	"testing"
 
@@ -20,3 +21,5 @@ func TestInitServices(t *testing.T) {
 			got, expected)
 	}
 }
+
+var errRepository = errors.New("repository error")
