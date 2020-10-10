@@ -66,8 +66,8 @@ func TestMemberRepositoryGetAll(t *testing.T) {
 			},
 			configureMock: func(conf mockConfig) {
 				rows := sqlmock.NewRows([]string{"id", "name"})
-				for _, book := range conf.expected.members {
-					rows.AddRow(book.ID, book.Name)
+				for _, member := range conf.expected.members {
+					rows.AddRow(member.ID, member.Name)
 				}
 
 				conf.mock.ExpectQuery(queryRgx).
@@ -123,7 +123,7 @@ func TestMemberRepositoryGetAll(t *testing.T) {
 				err, expectedError)
 		}
 		if expectedMembers := tt.expectedOutput.members; err == nil && !reflect.DeepEqual(members, expectedMembers) {
-			t.Errorf("GetAll() got books: %+v \nexpected: %+v",
+			t.Errorf("GetAll() got members: %+v \nexpected: %+v",
 				members, expectedMembers)
 		}
 	}
@@ -243,7 +243,7 @@ func TestMemberRepositoryUpdateMember(t *testing.T) {
 		configureMock  func(mockConfig)
 	}{
 		{
-			name: "success update book",
+			name: "success update member",
 			givenInput: input{
 				ctx: context.TODO(),
 				member: &models.Member{
@@ -268,7 +268,7 @@ func TestMemberRepositoryUpdateMember(t *testing.T) {
 			},
 		},
 		{
-			name: "error update book",
+			name: "error update member",
 			givenInput: input{
 				ctx: context.TODO(),
 				member: &models.Member{
