@@ -55,3 +55,6 @@ issues:
     - path: _test\.go
       linters:
         - dupl
+    - path: repositories/
+      linters:
+        - dupl
