@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"net/http"
 	"net/http/httptest"
@@ -43,7 +42,11 @@ func TestNewBookController(t *testing.T) {
 	}
 }
 
-func TestBookController_CreateBook(t *testing.T) {
+const (
+	v1BookURL = "/v1/book"
+)
+
+func TestBookControllerCreateBook(t *testing.T) {
 	type input struct {
 		valid              bool
 		ctx                context.Context
@@ -81,10 +84,12 @@ func TestBookController_CreateBook(t *testing.T) {
 					"error": "Invalid request payload",
 				},
 			},
-			configureMock: func(mockConfig) {},
+			configureMock: func(mockConfig) {
+				// do nothing
+			},
 		},
 		{
-			name: "failed: service error",
+			name: "failed: create book service returns error",
 			givenInput: input{
 				valid: true,
 				ctx:   context.TODO(),
@@ -95,13 +100,13 @@ func TestBookController_CreateBook(t *testing.T) {
 			},
 			expectedOutput: output{
 				responseBody: responses.ErrorResponse{
-					"error": fmt.Sprintf("Failed create book: %s", "service error"),
+					"error": fmt.Sprintf("Failed create book: %s", serviceError.Error()),
 				},
 			},
 			configureMock: func(conf mockConfig) {
 				conf.mock.EXPECT().
 					CreateBook(conf.given.ctx, conf.given.requestBody).
-					Return(errors.New("service error"))
+					Return(serviceError)
 			},
 		},
 		{
@@ -141,8 +146,8 @@ func TestBookController_CreateBook(t *testing.T) {
 			}
 
 			req, _ := http.NewRequest(
-				"POST",
-				"/v1/book",
+				http.MethodPost,
+				v1BookURL,
 				bytes.NewBuffer(marshalledRequestBody),
 			)
 			resp := httptest.NewRecorder()
@@ -162,14 +167,14 @@ func TestBookController_CreateBook(t *testing.T) {
 			got := resp.Body.String()
 			expected, _ := json.Marshal(tt.expectedOutput.responseBody)
 			if got != string(expected) {
-				t.Errorf("got response body %s\n expected %s",
+				t.Errorf("CreateBook() got response body %s\n expected %s",
 					got, string(expected))
 			}
 		})
 	}
 }
 
-func TestBookController_GetBook(t *testing.T) {
+func TestBookControllerGetBook(t *testing.T) {
 	type input struct {
 		ctx            context.Context
 		httpRequestURL string
@@ -191,27 +196,27 @@ func TestBookController_GetBook(t *testing.T) {
 		configureMock  func(mockConfig)
 	}{
 		{
-			name: "failed: service error",
+			name: "failed: get books service returns error",
 			givenInput: input{
 				ctx:            context.TODO(),
-				httpRequestURL: "/v1/book",
+				httpRequestURL: v1BookURL,
 			},
 			expectedOutput: output{
 				responseBody: responses.ErrorResponse{
-					"error": fmt.Sprintf("Failed get books: %s", "service error"),
+					"error": fmt.Sprintf("Failed get books: %s", serviceError.Error()),
 				},
 			},
 			configureMock: func(conf mockConfig) {
 				conf.mock.EXPECT().
 					GetBooks(conf.given.ctx).
-					Return(models.Books{}, errors.New("service error"))
+					Return(models.Books{}, serviceError)
 			},
 		},
 		{
 			name: "success: get books",
 			givenInput: input{
 				ctx:            context.TODO(),
-				httpRequestURL: "/v1/book",
+				httpRequestURL: v1BookURL,
 			},
 			expectedOutput: output{
 				responseBody: models.Books{
@@ -231,7 +236,7 @@ func TestBookController_GetBook(t *testing.T) {
 			name: "success: search books",
 			givenInput: input{
 				ctx:            context.TODO(),
-				httpRequestURL: "/v1/book?search=1234",
+				httpRequestURL: v1BookURL + "?search=1234",
 				query:          "1234",
 			},
 			expectedOutput: output{
@@ -256,7 +261,7 @@ func TestBookController_GetBook(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			req, _ := http.NewRequest(
-				"GET",
+				http.MethodGet,
 				tt.givenInput.httpRequestURL,
 				nil,
 			)
@@ -278,14 +283,14 @@ func TestBookController_GetBook(t *testing.T) {
 			got := resp.Body.String()
 			expected, _ := json.Marshal(tt.expectedOutput.responseBody)
 			if got != string(expected) {
-				t.Errorf("got response body %s\n expected %s",
+				t.Errorf("GetBooks() got response body %s\n expected %s",
 					got, string(expected))
 			}
 		})
 	}
 }
 
-func TestBookController_UpdateBook(t *testing.T) {
+func TestBookControllerUpdateBook(t *testing.T) {
 	type input struct {
 		valid              bool
 		ctx                context.Context
@@ -301,14 +306,14 @@ func TestBookController_UpdateBook(t *testing.T) {
 	}
 
 	tests := []struct {
-		name          string
-		input         input
-		output        output
-		configureMock func(confMock)
+		name           string
+		givenInput     input
+		expectedOutput output
+		configureMock  func(confMock)
 	}{
 		{
 			name: "failed: invalid request body",
-			input: input{
+			givenInput: input{
 				valid: false,
 				ctx:   context.TODO(),
 				invalidRequestBody: models.Books{
@@ -318,16 +323,18 @@ func TestBookController_UpdateBook(t *testing.T) {
 					},
 				},
 			},
-			output: output{
+			expectedOutput: output{
 				responseBody: responses.ErrorResponse{
 					"error": "Invalid request payload",
 				},
 			},
-			configureMock: func(confMock) {},
+			configureMock: func(confMock) {
+				// do nothing
+			},
 		},
 		{
-			name: "failed: service error",
-			input: input{
+			name: "failed: update book service returns error",
+			givenInput: input{
 				valid: true,
 				ctx:   context.TODO(),
 				requestBody: &models.Book{
@@ -335,20 +342,20 @@ func TestBookController_UpdateBook(t *testing.T) {
 					ISBN: "1234",
 				},
 			},
-			output: output{
+			expectedOutput: output{
 				responseBody: responses.ErrorResponse{
-					"error": fmt.Sprintf("Failed update book: %s", "service error"),
+					"error": fmt.Sprintf("Failed update book: %s", serviceError.Error()),
 				},
 			},
 			configureMock: func(conf confMock) {
 				conf.mock.EXPECT().
 					UpdateBook(conf.given.ctx, conf.given.requestBody).
-					Return(errors.New("service error"))
+					Return(serviceError)
 			},
 		},
 		{
 			name: "success: update book",
-			input: input{
+			givenInput: input{
 				valid: true,
 				ctx:   context.TODO(),
 				requestBody: &models.Book{
@@ -356,7 +363,7 @@ func TestBookController_UpdateBook(t *testing.T) {
 					ISBN: "1234",
 				},
 			},
-			output: output{
+			expectedOutput: output{
 				responseBody: models.Book{
 					Name: "C++",
 					ISBN: "1234",
@@ -376,22 +383,22 @@ func TestBookController_UpdateBook(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			var marshalledRequestBody []byte
-			if tt.input.valid {
-				marshalledRequestBody, _ = json.Marshal(tt.input.requestBody)
+			if tt.givenInput.valid {
+				marshalledRequestBody, _ = json.Marshal(tt.givenInput.requestBody)
 			} else {
-				marshalledRequestBody, _ = json.Marshal(tt.input.invalidRequestBody)
+				marshalledRequestBody, _ = json.Marshal(tt.givenInput.invalidRequestBody)
 			}
 
 			req, _ := http.NewRequest(
-				"PUT",
-				"/v1/book",
+				http.MethodPut,
+				v1BookURL,
 				bytes.NewBuffer(marshalledRequestBody),
 			)
 			resp := httptest.NewRecorder()
 
 			bookServiceMock := mocks.NewMockBookService(ctrl)
 			tt.configureMock(confMock{
-				given: tt.input,
+				given: tt.givenInput,
 				mock:  bookServiceMock,
 			})
 
@@ -402,9 +409,9 @@ func TestBookController_UpdateBook(t *testing.T) {
 			bookController.UpdateBook(resp, req)
 
 			got := resp.Body.String()
-			expected, _ := json.Marshal(tt.output.responseBody)
+			expected, _ := json.Marshal(tt.expectedOutput.responseBody)
 			if got != string(expected) {
-				t.Errorf("got response body %s\n expected %s",
+				t.Errorf("UpdateBook() got response body %s\n expected %s",
 					got, string(expected))
 			}
 		})
