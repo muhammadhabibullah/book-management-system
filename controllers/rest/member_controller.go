@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"book-management-system/controllers/rest/middlewares"
 	"book-management-system/entities/models"
 	"book-management-system/usecases"
 	"book-management-system/usecases/services"
@@ -18,7 +19,11 @@ type MemberController struct {
 }
 
 // NewMemberController returns new MemberController
-func NewMemberController(route *mux.Router, useCase *usecases.UseCase) *MemberController {
+func NewMemberController(
+	route *mux.Router,
+	useCase *usecases.UseCase,
+	m *middlewares.Middleware,
+) *MemberController {
 	ctrl := &MemberController{
 		memberService: useCase.Service.MemberService,
 	}
@@ -26,9 +31,13 @@ func NewMemberController(route *mux.Router, useCase *usecases.UseCase) *MemberCo
 	v1Route := route.PathPrefix("/v1").Subrouter()
 
 	v1MemberRoute := v1Route.PathPrefix("/member").Subrouter()
-	v1MemberRoute.HandleFunc("", ctrl.CreateMember).Methods(http.MethodPost)
-	v1MemberRoute.HandleFunc("", ctrl.GetMembers).Methods(http.MethodGet)
-	v1MemberRoute.HandleFunc("", ctrl.UpdateMember).Methods(http.MethodPut)
+
+	v1MemberAuthorizedRoute := v1MemberRoute.PathPrefix("").Subrouter()
+	v1MemberAuthorizedRoute.Use(m.AuthMiddleware)
+
+	v1MemberAuthorizedRoute.HandleFunc("", ctrl.CreateMember).Methods(http.MethodPost)
+	v1MemberAuthorizedRoute.HandleFunc("", ctrl.GetMembers).Methods(http.MethodGet)
+	v1MemberAuthorizedRoute.HandleFunc("", ctrl.UpdateMember).Methods(http.MethodPut)
 
 	return ctrl
 }

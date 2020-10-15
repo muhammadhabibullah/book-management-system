@@ -7,6 +7,7 @@ import (
 
 	"github.com/gorilla/mux"
 
+	"book-management-system/controllers/rest/middlewares"
 	"book-management-system/entities/models"
 	"book-management-system/usecases"
 	"book-management-system/usecases/services"
@@ -18,7 +19,11 @@ type BookController struct {
 }
 
 // NewBookController returns new BookController
-func NewBookController(route *mux.Router, useCase *usecases.UseCase) *BookController {
+func NewBookController(
+	route *mux.Router,
+	useCase *usecases.UseCase,
+	m *middlewares.Middleware,
+) *BookController {
 	ctrl := &BookController{
 		bookService: useCase.Service.BookService,
 	}
@@ -26,9 +31,13 @@ func NewBookController(route *mux.Router, useCase *usecases.UseCase) *BookContro
 	v1Route := route.PathPrefix("/v1").Subrouter()
 
 	v1BookRoute := v1Route.PathPrefix("/book").Subrouter()
-	v1BookRoute.HandleFunc("", ctrl.CreateBook).Methods(http.MethodPost)
+
+	v1BookAuthorizedRoute := v1BookRoute.PathPrefix("").Subrouter()
+	v1BookAuthorizedRoute.Use(m.AuthMiddleware)
+
+	v1BookAuthorizedRoute.HandleFunc("", ctrl.CreateBook).Methods(http.MethodPost)
 	v1BookRoute.HandleFunc("", ctrl.GetBooks).Methods(http.MethodGet)
-	v1BookRoute.HandleFunc("", ctrl.UpdateBook).Methods(http.MethodPut)
+	v1BookAuthorizedRoute.HandleFunc("", ctrl.UpdateBook).Methods(http.MethodPut)
 
 	return ctrl
 }

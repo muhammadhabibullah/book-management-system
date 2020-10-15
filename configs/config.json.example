@@ -21,5 +21,8 @@
     "IsAuth": false,
     "Username": "",
     "Password": ""
+  },
+  "JWT": {
+    "Key": "secretkey"
   }
 }

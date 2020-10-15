@@ -13,6 +13,7 @@ import (
 	"github.com/golang/mock/gomock"
 	"github.com/gorilla/mux"
 
+	"book-management-system/controllers/rest/middlewares"
 	"book-management-system/controllers/rest/responses"
 	"book-management-system/entities/models"
 	mocks "book-management-system/mocks/services"
@@ -31,7 +32,8 @@ func TestNewMemberController(t *testing.T) {
 	}
 
 	route := mux.NewRouter()
-	got := NewMemberController(route, usecase)
+	m := &middlewares.Middleware{}
+	got := NewMemberController(route, usecase, m)
 	expected := &MemberController{
 		memberService: memberService,
 	}

@@ -19,6 +19,7 @@ type Configs struct {
 	Server        ServerConfig
 	Mysql         MySQLConfig
 	ElasticSearch ESConfig
+	JWT           JWTConfig
 }
 
 // ServerConfig consists server configuration
@@ -47,6 +48,11 @@ type ESConfig struct {
 	IsAuth   bool
 	Username string
 	Password string
+}
+
+// JWTConfig consists JWT token authentication configuration
+type JWTConfig struct {
+	Key string
 }
 
 // GetConfig return Configs object read from config.json file

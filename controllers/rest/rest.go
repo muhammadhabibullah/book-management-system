@@ -15,6 +15,7 @@ import (
 	httpSwagger "github.com/swaggo/http-swagger"
 
 	"book-management-system/configs"
+	"book-management-system/controllers/rest/middlewares"
 	"book-management-system/docs"
 	"book-management-system/entities/constants"
 	"book-management-system/usecases"
@@ -23,9 +24,10 @@ import (
 // Init REST controllers
 func Init(useCase *usecases.UseCase) {
 	r := mux.NewRouter()
+	m := middlewares.InitMiddleware()
 
-	NewBookController(r, useCase)
-	NewMemberController(r, useCase)
+	NewBookController(r, useCase, m)
+	NewMemberController(r, useCase, m)
 
 	initDoc(r)
 	serve(r)
@@ -58,6 +60,7 @@ func serve(r http.Handler) {
 	}
 
 	go func() {
+		log.Println("Starting server")
 		if err := srv.ListenAndServe(); err != nil {
 			log.Println(err)
 		}
