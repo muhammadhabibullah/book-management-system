@@ -22,6 +22,6 @@ require (
 	github.com/swaggo/http-swagger v0.0.0-20200308142732-58ac5e232fba
 	github.com/swaggo/swag v1.7.0
 	gopkg.in/ini.v1 v1.60.2 // indirect
-	gorm.io/driver/mysql v1.0.4
-	gorm.io/gorm v1.20.12
+	gorm.io/driver/mysql v1.4.3
+	gorm.io/gorm v1.23.8
 )
